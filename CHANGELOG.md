@@ -5,6 +5,31 @@ All notable changes to Galaxy Book Enabler will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-03-11
+
+### New Device Profiles
+- Added **Galaxy Book6 Ultra 2026** (`960XKB`) — Intel Core Ultra Series 3 Panther Lake, Nvidia RTX 5070
+- Added **Galaxy Book6 Pro 2026** (`960XKA`) — Intel Core Ultra Series 3 Panther Lake, 14"/16" variants
+  - BIOS platform code: `AMB`/`AMC` (follows AMA from Book5 Pro)
+  - SKU suffix: `PTLK` (Panther Lake, mirrors `LNLM` for Lunar Lake in Book5)
+  - Model strings: `NP960XKA-KG1US` / `NP960XKB-KG1US`
+- Total device profiles: **23**
+
+### AMD Ryzen Support (addresses Issue #62, #47)
+- New `Get-CPUPlatform` function — detects Intel / AMD / ARM vendor at install time
+- New `Get-WifiPlatform` function — vendor-ID detection for Intel (8086), MediaTek/AMD RZ-series (14C3), Realtek (10EC), Qualcomm (168C/17CB)
+- New `Get-BluetoothPlatform` function — Intel (8087), MediaTek (0E8D), Realtek (0BDA)
+- New `Show-HardwareCompatibility` — pre-install compatibility report with per-feature matrix (Notes/Buds: always ✓; Quick Share: Intel Wi-Fi only; etc.)
+- AMD-specific guidance: recommends 960XKA or 960XHA profiles, explains Wi-Fi Direct limitation, links to Issue #62
+- ARM CPU detected → experimental warning shown (Issue #49)
+
+### UI
+- New `Show-ModelSelectionMenu` — groups models by series (Book6/5/4/3/Legacy), highlights ★ NEW models in cyan, shows AMD profile tip
+- Script scope caches `$script:DetectedCPU/Wifi/Bt` to avoid duplicate PnP scans
+
+### Bug Fixes
+- Wi-Fi detection now uses hardware vendor IDs (language-independent) for ALL vendors, not just Intel — fixes false-positive "Intel Wi-Fi detected" on some OEM rebrands
+
 ## [3.1.0] - 2026-01-10
 
 ### Added

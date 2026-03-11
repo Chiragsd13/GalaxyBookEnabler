@@ -1,4 +1,4 @@
-# Galaxy Book Enabler Installer/Uninstaller
+﻿# Galaxy Book Enabler Installer/Uninstaller
 # Enables Samsung Galaxy Book features on non-Galaxy Book devices
 
 <#
@@ -7,15 +7,27 @@
 
 .DESCRIPTION
     This tool spoofs your device as a Samsung Galaxy Book to enable features like:
-    - Quick Share (requires Intel Wi-Fi + Intel Bluetooth)
-    - Camera Share (requires Intel Wi-Fi + Intel Bluetooth)
-    - Storage Share (requires Intel Wi-Fi + Intel Bluetooth)
-    - Multi Control (requires Intel Wi-Fi + Intel Bluetooth - compatibility varies by hardware)
-    - Second Screen (requires Intel Wi-Fi + Intel Bluetooth - compatibility varies by hardware)
-    - Samsung Notes
-    - AI Select (with keyboard shortcut setup)
+    - Quick Share          (Intel Wi-Fi + Intel Bluetooth required)
+    - Camera Share         (Intel Wi-Fi + Intel Bluetooth required)
+    - Storage Share        (Intel Wi-Fi + Intel Bluetooth required)
+    - Multi Control        (Intel Wi-Fi + Intel Bluetooth — intermittent on all hardware)
+    - Second Screen        (Intel Wi-Fi 6/6E/7 + Intel Bluetooth)
+    - Samsung Notes / Bixby / AI Select  (works on ALL hardware, incl. AMD Ryzen)
+    - Galaxy Buds MultiPoint             (works on ALL hardware)
+    - Samsung Settings / Knox / Pass     (works on ALL hardware)
     - System Support Engine (advanced/experimental)
-    
+    AMD Ryzen support:
+    - All non-Wi-Fi features (Notes, Buds, Settings) work fully on AMD.
+    - Quick Share / Camera Share / Storage Share require Intel Wi-Fi (even on AMD CPUs).
+    - Continuity Service clipboard sync is under investigation on AMD (Issue #62).
+    - AMD systems with Intel Wi-Fi cards (separate chip) are treated as Intel Wi-Fi.
+    Supported profiles (23 total):
+    - Galaxy Book6 Ultra 2026 (960XKB) ★ NEW
+    - Galaxy Book6 Pro  2026 (960XKA) ★ NEW
+    - Galaxy Book5 Pro / 5 Pro 360 / 5 360
+    - Galaxy Book4 Ultra / Pro / Pro 360
+    - Galaxy Book3 Ultra / Pro / Pro 360
+    - Galaxy Book (legacy series back to Notebook 9)
     It handles automatic startup configuration and Wi-Fi/Bluetooth compatibility detection.
 
 .PARAMETER Uninstall
@@ -53,8 +65,12 @@
     File Name      : Install-GalaxyBookEnabler.ps1
     Prerequisite   : PowerShell 7.0 or later
     Requires Admin : Yes
-    Version        : 3.0.0
+    Version        : 3.2.0
     Repository     : https://github.com/Bananz0/GalaxyBookEnabler
+    Patch Author   : Chirag Sood <chiragsd13@gmail.com>
+    Patch Notes    : v3.2.0 - Added Galaxy Book6 Ultra/Pro (960XKB/960XKA), AMD Ryzen
+                     support, CPU/Wi-Fi/BT platform detection, hardware compatibility
+                     report, and updated model selection menu.
 #>
 
 param(
@@ -245,7 +261,7 @@ if (-not $isAdmin) {
 }
 
 # VERSION CONSTANT
-$SCRIPT_VERSION = "3.1.0"
+$SCRIPT_VERSION = "3.2.0"
 $GITHUB_REPO = "Bananz0/GalaxyBookEnabler"
 $UPDATE_CHECK_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
 
@@ -322,87 +338,373 @@ function Write-LogSystemInfo {
     }
 }
 
-function Write-LogHardwareInfo {
-    Write-LogSection "HARDWARE DETECTION"
-    
+function Get-CPUPlatform {
+    <#
+    .SYNOPSIS
+        Detects the CPU vendor (Intel / AMD / ARM / Unknown).
+    .OUTPUTS
+        Hashtable: Vendor, Name, IsIntel, IsAMD, IsARM
+    #>
     try {
-        # Wi-Fi adapter
-        $wifiDevices = Get-PnpDevice -Class "Net" -Status "OK" -ErrorAction SilentlyContinue | 
-            Where-Object { $_.HardwareID -match "VEN_8086|VID_8086" -and $_.FriendlyName -match "Wi-Fi|Wireless" }
-        
-        if ($wifiDevices) {
-            foreach ($wifi in $wifiDevices) {
-                Write-Log "Wi-Fi (Intel): $($wifi.FriendlyName)"
-                Write-Log "  Hardware ID: $($wifi.HardwareID[0])"
-            }
+        $cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
+        $name = $cpu.Name
+        Write-Log "CPU detected: $name"
+        if ($name -match 'AMD|Ryzen|EPYC|Athlon') {
+            return @{ Vendor = 'AMD';     Name = $name; IsIntel = $false; IsAMD = $true;  IsARM = $false }
+        }
+        elseif ($name -match 'Intel|Core|Celeron|Pentium|Xeon') {
+            return @{ Vendor = 'Intel';   Name = $name; IsIntel = $true;  IsAMD = $false; IsARM = $false }
+        }
+        elseif ($name -match 'Qualcomm|Snapdragon|ARM|Ampere') {
+            return @{ Vendor = 'ARM';     Name = $name; IsIntel = $false; IsAMD = $false; IsARM = $true  }
         }
         else {
-            $wifiAdapters = Get-NetAdapter -ErrorAction SilentlyContinue | 
-                Where-Object { $_.Status -eq "Up" -and ($_.InterfaceDescription -like "*Wi-Fi*" -or $_.InterfaceDescription -like "*Wireless*") }
-            
-            if ($wifiAdapters) {
-                foreach ($adapter in $wifiAdapters) {
-                    Write-Log "Wi-Fi: $($adapter.InterfaceDescription)" -Level WARNING
-                    Write-Log "  Note: Not Intel (may not support Samsung apps)"
-                }
-            }
-            else {
-                Write-Log "Wi-Fi: Not detected" -Level WARNING
-            }
-        }
-        
-        # Bluetooth adapter
-        $btDevices = Get-PnpDevice -Class "Bluetooth" -Status "OK" -ErrorAction SilentlyContinue | 
-            Where-Object { $_.HardwareID -match "VEN_8087|VID_8087" }
-        
-        if ($btDevices) {
-            foreach ($bt in $btDevices) {
-                Write-Log "Bluetooth (Intel): $($bt.FriendlyName)"
-                Write-Log "  Hardware ID: $($bt.HardwareID[0])"
-            }
-        }
-        else {
-            $btAdapters = Get-PnpDevice -Class "Bluetooth" -Status "OK" -ErrorAction SilentlyContinue
-            if ($btAdapters) {
-                foreach ($adapter in $btAdapters) {
-                    Write-Log "Bluetooth: $($adapter.FriendlyName)" -Level WARNING
-                    Write-Log "  Note: Not Intel (may not support Samsung apps)"
-                }
-            }
-            else {
-                Write-Log "Bluetooth: Not detected" -Level WARNING
-            }
+            return @{ Vendor = 'Unknown'; Name = $name; IsIntel = $false; IsAMD = $false; IsARM = $false }
         }
     }
     catch {
-        Write-Log "Failed to detect hardware: $($_.Exception.Message)" -Level ERROR
+        Write-Log "Failed to detect CPU: $($_.Exception.Message)" -Level ERROR
+        return @{ Vendor = 'Unknown'; Name = 'Unknown'; IsIntel = $false; IsAMD = $false; IsARM = $false }
+    }
+}
+
+function Get-WifiPlatform {
+    <#
+    .SYNOPSIS
+        Detects the active Wi-Fi adapter vendor and Wi-Fi Direct capability.
+    .DESCRIPTION
+        Vendor IDs checked:
+          8086 = Intel      (full Wi-Fi Direct / Samsung Quick Share support)
+          14C3 = MediaTek   (AMD RZ-series, limited Wi-Fi Direct)
+          10EC = Realtek    (common on AMD laptops, limited Wi-Fi Direct)
+          168C = Qualcomm/Atheros (limited Wi-Fi Direct)
+          17CB = Qualcomm (newer, limited Wi-Fi Direct)
+    .OUTPUTS
+        Hashtable: Vendor, Name, HardwareID, IsIntel, SupportsQuickShare, Generation
+    #>
+    $result = @{
+        Vendor            = 'Unknown'
+        Name              = 'Not detected'
+        HardwareID        = $null
+        IsIntel           = $false
+        SupportsQuickShare = $false
+        Generation        = 'Unknown'
+        Found             = $false
+    }
+    try {
+        # ── Intel Wi-Fi (VEN 8086) ──
+        $intelWifi = Get-PnpDevice -Class 'Net' -Status 'OK' -ErrorAction SilentlyContinue |
+            Where-Object { $_.HardwareID -match 'VEN_8086|VID_8086' -and $_.FriendlyName -match 'Wi-Fi|Wireless' } |
+            Select-Object -First 1
+        if ($intelWifi) {
+            $hwId = $intelWifi.HardwareID[0]
+            $gen = switch -Regex ($hwId) {
+                '51F0|54F0|A840|7AF0|7E40' { '7'  }
+                'A0F0|02F0|06F0|34F0|43F0|4DF0|A8F0|2723|2725' { '6E' }
+                '2723|2725|271C|271B|2526|2528' { '6'  }
+                '24F3|24FD|24FB|3165|3168|9462|9560|9260' { '5'  }
+                default { 'Unknown' }
+            }
+            $result.Vendor             = 'Intel'
+            $result.Name               = $intelWifi.FriendlyName
+            $result.HardwareID         = $hwId
+            $result.IsIntel            = $true
+            $result.SupportsQuickShare = $true
+            $result.Generation         = $gen
+            $result.Found              = $true
+            Write-Log "Wi-Fi: Intel $gen — $($intelWifi.FriendlyName)"
+            return $result
+        }
+        # ── MediaTek Wi-Fi (VEN 14C3) — AMD RZ616 / RZ608 / RZ618 ──
+        $mtWifi = Get-PnpDevice -Class 'Net' -Status 'OK' -ErrorAction SilentlyContinue |
+            Where-Object { $_.HardwareID -match 'VEN_14C3|VID_14C3' -and $_.FriendlyName -match 'Wi-Fi|Wireless' } |
+            Select-Object -First 1
+        if ($mtWifi) {
+            $hwId = $mtWifi.HardwareID[0]
+            $gen = if ($hwId -match '0616|0608|7961|7922') { '6E' } else { '6' }
+            $result.Vendor             = 'MediaTek'
+            $result.Name               = $mtWifi.FriendlyName
+            $result.HardwareID         = $hwId
+            $result.IsIntel            = $false
+            $result.SupportsQuickShare = $false
+            $result.Generation         = $gen
+            $result.Found              = $true
+            Write-Log "Wi-Fi: MediaTek (AMD RZ-series) $gen — $($mtWifi.FriendlyName)" -Level WARNING
+            return $result
+        }
+        # ── Realtek Wi-Fi (VEN 10EC) ──
+        $realtekWifi = Get-PnpDevice -Class 'Net' -Status 'OK' -ErrorAction SilentlyContinue |
+            Where-Object { $_.HardwareID -match 'VEN_10EC|VID_10EC' -and $_.FriendlyName -match 'Wi-Fi|Wireless' } |
+            Select-Object -First 1
+        if ($realtekWifi) {
+            $hwId = $realtekWifi.HardwareID[0]
+            $gen = if ($hwId -match '8852|8832|8851') { '6' } else { '5' }
+            $result.Vendor             = 'Realtek'
+            $result.Name               = $realtekWifi.FriendlyName
+            $result.HardwareID         = $hwId
+            $result.IsIntel            = $false
+            $result.SupportsQuickShare = $false
+            $result.Generation         = $gen
+            $result.Found              = $true
+            Write-Log "Wi-Fi: Realtek $gen — $($realtekWifi.FriendlyName)" -Level WARNING
+            return $result
+        }
+        # ── Qualcomm Wi-Fi (VEN 168C / 17CB) ──
+        $qcomWifi = Get-PnpDevice -Class 'Net' -Status 'OK' -ErrorAction SilentlyContinue |
+            Where-Object { $_.HardwareID -match 'VEN_168C|VID_168C|VEN_17CB|VID_17CB' -and $_.FriendlyName -match 'Wi-Fi|Wireless' } |
+            Select-Object -First 1
+        if ($qcomWifi) {
+            $hwId = $qcomWifi.HardwareID[0]
+            $result.Vendor             = 'Qualcomm'
+            $result.Name               = $qcomWifi.FriendlyName
+            $result.HardwareID         = $hwId
+            $result.IsIntel            = $false
+            $result.SupportsQuickShare = $false
+            $result.Generation         = '6E'
+            $result.Found              = $true
+            Write-Log "Wi-Fi: Qualcomm — $($qcomWifi.FriendlyName)" -Level WARNING
+            return $result
+        }
+        # ── Fallback: any active wireless adapter ──
+        $anyWifi = Get-NetAdapter -ErrorAction SilentlyContinue |
+            Where-Object { $_.Status -eq 'Up' -and ($_.InterfaceDescription -like '*Wi-Fi*' -or $_.InterfaceDescription -like '*Wireless*') } |
+            Select-Object -First 1
+        if ($anyWifi) {
+            $result.Name  = $anyWifi.InterfaceDescription
+            $result.Found = $true
+            Write-Log "Wi-Fi (unknown vendor): $($anyWifi.InterfaceDescription)" -Level WARNING
+        }
+    }
+    catch {
+        Write-Log "Failed to detect Wi-Fi: $($_.Exception.Message)" -Level ERROR
+    }
+    return $result
+}
+
+function Get-BluetoothPlatform {
+    <#
+    .SYNOPSIS
+        Detects the Bluetooth adapter vendor.
+    .OUTPUTS
+        Hashtable: Vendor, Name, IsIntel, Found
+    #>
+    $result = @{ Vendor = 'Unknown'; Name = 'Not detected'; IsIntel = $false; Found = $false }
+    try {
+        # Intel BT (VID 8087)
+        $intelBt = Get-PnpDevice -Class 'Bluetooth' -Status 'OK' -ErrorAction SilentlyContinue |
+            Where-Object { $_.HardwareID -match 'VEN_8087|VID_8087' } |
+            Select-Object -First 1
+        if ($intelBt) {
+            $result.Vendor  = 'Intel'
+            $result.Name    = $intelBt.FriendlyName
+            $result.IsIntel = $true
+            $result.Found   = $true
+            Write-Log "Bluetooth: Intel — $($intelBt.FriendlyName)"
+            return $result
+        }
+        # MediaTek BT (VID 0E8D) — matches AMD RZ-series combo cards
+        $mtBt = Get-PnpDevice -Class 'Bluetooth' -Status 'OK' -ErrorAction SilentlyContinue |
+            Where-Object { $_.HardwareID -match 'VID_0E8D|VEN_0E8D' } |
+            Select-Object -First 1
+        if ($mtBt) {
+            $result.Vendor = 'MediaTek'
+            $result.Name   = $mtBt.FriendlyName
+            $result.Found  = $true
+            Write-Log "Bluetooth: MediaTek — $($mtBt.FriendlyName)" -Level WARNING
+            return $result
+        }
+        # Realtek BT (VID 0BDA)
+        $realtekBt = Get-PnpDevice -Class 'Bluetooth' -Status 'OK' -ErrorAction SilentlyContinue |
+            Where-Object { $_.HardwareID -match 'VID_0BDA|VEN_0BDA' } |
+            Select-Object -First 1
+        if ($realtekBt) {
+            $result.Vendor = 'Realtek'
+            $result.Name   = $realtekBt.FriendlyName
+            $result.Found  = $true
+            Write-Log "Bluetooth: Realtek — $($realtekBt.FriendlyName)" -Level WARNING
+            return $result
+        }
+        # Any other BT adapter
+        $anyBt = Get-PnpDevice -Class 'Bluetooth' -Status 'OK' -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+        if ($anyBt) {
+            $result.Vendor = 'Other'
+            $result.Name   = $anyBt.FriendlyName
+            $result.Found  = $true
+            Write-Log "Bluetooth (unknown vendor): $($anyBt.FriendlyName)" -Level WARNING
+        }
+    }
+    catch {
+        Write-Log "Failed to detect Bluetooth: $($_.Exception.Message)" -Level ERROR
+    }
+    return $result
+}
+
+function Show-HardwareCompatibility {
+    param(
+        [hashtable]$CPU,
+        [hashtable]$Wifi,
+        [hashtable]$Bt
+    )
+    Write-Host ""
+    Write-Host "  ══════════════════════════════════════════════════════════" -ForegroundColor DarkGray
+    Write-Host "  Hardware Compatibility Report" -ForegroundColor Cyan
+    Write-Host "  ══════════════════════════════════════════════════════════" -ForegroundColor DarkGray
+    Write-Host ""
+    $cpuColor = if ($CPU.IsIntel) { 'Green' } elseif ($CPU.IsAMD) { 'Yellow' } else { 'Red' }
+    $cpuIcon  = if ($CPU.IsIntel) { '✓' } elseif ($CPU.IsAMD) { '⚠' } else { '✗' }
+    Write-Host "  $cpuIcon CPU   : $($CPU.Name)" -ForegroundColor $cpuColor
+    $wifiColor = if ($Wifi.IsIntel) { 'Green' } elseif ($Wifi.Found) { 'Yellow' } else { 'Red' }
+    $wifiIcon  = if ($Wifi.IsIntel) { '✓' } elseif ($Wifi.Found) { '⚠' } else { '✗' }
+    $wifiGen   = if ($Wifi.Generation -ne 'Unknown') { " (Wi-Fi $($Wifi.Generation))" } else { '' }
+    Write-Host "  $wifiIcon Wi-Fi : $($Wifi.Vendor) — $($Wifi.Name)$wifiGen" -ForegroundColor $wifiColor
+    $btColor = if ($Bt.IsIntel) { 'Green' } elseif ($Bt.Found) { 'Yellow' } else { 'Red' }
+    $btIcon  = if ($Bt.IsIntel) { '✓' } elseif ($Bt.Found) { '⚠' } else { '✗' }
+    Write-Host "  $btIcon BT    : $($Bt.Vendor) — $($Bt.Name)" -ForegroundColor $btColor
+    Write-Host ""
+    $isIntelCombo = $Wifi.IsIntel -and $Bt.IsIntel
+    Write-Host "  Feature support matrix:" -ForegroundColor White
+    Write-Host ""
+    $features = [ordered]@{
+        "Samsung Notes / Bixby / AI Select"          = "always"
+        "Galaxy Buds (MultiPoint)"                   = "always"
+        "Quick Share (Wi-Fi Direct)"                 = if ($Wifi.IsIntel) { "ok" } else { "limited" }
+        "Camera Share / Storage Share"               = if ($Wifi.IsIntel) { "ok" } else { "limited" }
+        "Multi Control"                              = if ($isIntelCombo) { "ok" } else { "amd_limited" }
+        "Second Screen"                              = if ($isIntelCombo) { "ok" } else { "amd_limited" }
+        "Continuity Service (copy/paste/clipboard)"  = if ($isIntelCombo) { "ok" } else { "amd_continuity" }
+        "Samsung Settings / Knox / Pass"             = "always"
+    }
+    foreach ($feat in $features.Keys) {
+        $state = $features[$feat]
+        switch ($state) {
+            "always"         { Write-Host "    ✓  $feat" -ForegroundColor Green  }
+            "ok"             { Write-Host "    ✓  $feat" -ForegroundColor Green  }
+            "limited"        { Write-Host "    ⚠  $feat  [Non-Intel Wi-Fi — may not work]" -ForegroundColor Yellow }
+            "amd_limited"    { Write-Host "    ⚠  $feat  [Intel Wi-Fi + BT required for full reliability]" -ForegroundColor Yellow }
+            "amd_continuity" { Write-Host "    ⚠  $feat  [Known issues on AMD — see Issue #62]" -ForegroundColor Yellow }
+        }
+    }
+    Write-Host ""
+    if ($CPU.IsAMD) {
+        Write-Host "  ╔══════════════════════════════════════════════════════╗" -ForegroundColor Yellow
+        Write-Host "  ║  AMD Ryzen detected — additional notes               ║" -ForegroundColor Yellow
+        Write-Host "  ╚══════════════════════════════════════════════════════╝" -ForegroundColor Yellow
+        Write-Host ""
+        if ($Wifi.IsIntel) {
+            Write-Host "  Your AMD system has Intel Wi-Fi, which is the best-case" -ForegroundColor Cyan
+            Write-Host "  scenario. Quick Share and file-sharing features should work." -ForegroundColor Cyan
+            Write-Host "  Continuity Service clipboard sync may still be intermittent" -ForegroundColor Cyan
+            Write-Host "  on AMD — tracked in GitHub Issue #62." -ForegroundColor DarkGray
+        }
+        else {
+            Write-Host "  Your AMD system has $($Wifi.Vendor) Wi-Fi ($($Wifi.Name))." -ForegroundColor Yellow
+            Write-Host "  Samsung Quick Share requires Intel Wi-Fi Direct implementation." -ForegroundColor Yellow
+            Write-Host "  Quick Share, Camera Share, and Storage Share are NOT expected" -ForegroundColor Yellow
+            Write-Host "  to work. Samsung Notes, Buds, and Settings WILL work." -ForegroundColor Green
+            Write-Host ""
+            Write-Host "  Workaround: Add an Intel Wi-Fi USB dongle or PCIe card" -ForegroundColor DarkGray
+            Write-Host "  (e.g., Intel AX200/AX210/BE200) for full feature support." -ForegroundColor DarkGray
+        }
+        Write-Host ""
+        Write-Host "  BIOS spoof recommendation for AMD systems:" -ForegroundColor Cyan
+        Write-Host "  Use a Galaxy Book5 Pro (960XHA) or Galaxy Book6 Pro (960XKA)" -ForegroundColor White
+        Write-Host "  profile — these are the most tested on non-Intel hardware." -ForegroundColor DarkGray
+        Write-Host ""
+    }
+    if ($CPU.IsARM) {
+        Write-Host "  ╔══════════════════════════════════════════════════════╗" -ForegroundColor Red
+        Write-Host "  ║  ARM CPU detected — LIMITED SUPPORT                  ║" -ForegroundColor Red
+        Write-Host "  ╚══════════════════════════════════════════════════════╝" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "  This script is designed for x64 (Intel/AMD) Windows systems." -ForegroundColor Red
+        Write-Host "  ARM support is experimental — tracked in GitHub Issue #49." -ForegroundColor Yellow
+        Write-Host "  Samsung apps may install but connectivity features are unlikely" -ForegroundColor Yellow
+        Write-Host "  to work. Proceed at your own risk." -ForegroundColor Yellow
+        Write-Host ""
+    }
+    if (-not $CPU.IsIntel -or -not $Wifi.IsIntel) {
+        Write-Host "  Press Enter to continue anyway, or Ctrl+C to exit." -ForegroundColor DarkGray
+        Read-Host | Out-Null
+    }
+}
+
+function Write-LogHardwareInfo {
+    Write-LogSection "HARDWARE DETECTION"
+    try {
+        $cpuInfo  = Get-CPUPlatform
+        $wifiInfo = Get-WifiPlatform
+        $btInfo   = Get-BluetoothPlatform
+        Write-Log "CPU Vendor  : $($cpuInfo.Vendor)"
+        Write-Log "CPU Name    : $($cpuInfo.Name)"
+        Write-Log "Wi-Fi Vendor: $($wifiInfo.Vendor) — $($wifiInfo.Name)"
+        if ($wifiInfo.HardwareID) { Write-Log "Wi-Fi HW ID : $($wifiInfo.HardwareID)" }
+        Write-Log "Wi-Fi Gen   : $($wifiInfo.Generation)"
+        Write-Log "BT Vendor   : $($btInfo.Vendor) — $($btInfo.Name)"
+        $script:DetectedCPU  = $cpuInfo
+        $script:DetectedWifi = $wifiInfo
+        $script:DetectedBt   = $btInfo
+    }
+    catch {
+        Write-Log "Failed to gather hardware info: $($_.Exception.Message)" -Level ERROR
     }
 }
 
 
 # Galaxy Book Model Database
 $GalaxyBookModels = @{
-    '730QFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P03VAE.330.230322.PL'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 360'; SystemProductName = '730QFG'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PVAE'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP730QFG-KB1UK'; EnclosureKind = 31 }
-    '750QGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P03RHC.170.240226.HC'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 360'; SystemProductName = '750QGK'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PRHC'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750QGK-KG2US'; EnclosureKind = 31 }
-    '750QHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P04RHG.270.250515.SX'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 360'; SystemProductName = '750QHA'; ProductSku = 'SCAI-A5A5-A5A5-LNLM-PRHG'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750QHA-KA1US'; EnclosureKind = 31 }
-    '750XFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P09CFL.030.241212.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3'; SystemProductName = '750XFG'; ProductSku = 'SCAI-A5A5-A5A5-RPLP-PCFL'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XFG-KA3SE'; EnclosureKind = 10 }
-    '750XFH' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P09CFM.030.241212.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3'; SystemProductName = '750XFH'; ProductSku = 'SCAI-A5A5-A5A5-RPLP-PCFM'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XFH-XF1BR'; EnclosureKind = 10 }
-    '750XGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P02CFP.015.240409.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4'; SystemProductName = '750XGK'; ProductSku = 'SCAI-A5A5-A5A5-RPLU-PCFP'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XGK-KG1IT'; EnclosureKind = 10 }
-    '750XGL' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07CFP.020.250208.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4'; SystemProductName = '750XGL'; ProductSku = 'SCAI-A5A5-A5A5-RPLU-PCFP'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XGL-XG1BR'; EnclosureKind = 10 }
-    '930SBE' = @{ BIOSVendor = 'American Megatrends Inc.'; BIOSVersion = 'P07AGW.046.230519.SH'; BIOSMajorRelease = 5; BIOSMinorRelease = 13; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Notebook 9 Series'; SystemProductName = '930SBE/931SBE/930SBV'; ProductSku = 'SCAI-A5A5-A5A5-A5A5-PAGW'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NT930SBE-K716'; EnclosureKind = 31 }
-    '930XDB' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P13RFX.071.240415.SP'; BIOSMajorRelease = 5; BIOSMinorRelease = 19; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book Series'; SystemProductName = '930XDB/931XDB/930XDY'; ProductSku = 'SCAI-A5A5-A5A5-TGL3-PRFX'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP930XDB-KF6IT'; EnclosureKind = 10 }
-    '935QDC' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P04AKJ.016.231123.PS'; BIOSMajorRelease = 5; BIOSMinorRelease = 19; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book Series'; SystemProductName = '935QDC'; ProductSku = 'SCAI-A5A5-A5A5-TGL4-PAKJ'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP935QDC-KE2US'; EnclosureKind = 31 }
-    '940XGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P09VAG.690.240503.03'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Pro'; SystemProductName = '940XGK'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PVAG'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP940XGK-KG1FR'; EnclosureKind = 10 }
-    '940XHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P05VAJ.280.250210.01'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro'; SystemProductName = '940XHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PVAJ'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP940XHA-KG3IT'; EnclosureKind = 10 }
+    # ── Galaxy Book3 Series ──────────────────────────────────
+    '730QFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P03VAE.330.230322.PL'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 360';        SystemProductName = '730QFG'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PVAE'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP730QFG-KB1UK'; EnclosureKind = 31 }
+    '960QFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07ALN.260.240415.SH'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 Pro 360';    SystemProductName = '960QFG'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PALN'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP964QFG-KA1IT'; EnclosureKind = 31 }
+    '960XFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07RGU.330.240529.ZQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 Pro';       SystemProductName = '960XFG'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PRGU'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XFG-KC2CL'; EnclosureKind = 10 }
+    '960XFH' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07ALQ.190.240418.PS'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 Ultra';      SystemProductName = '960XFH'; ProductSku = 'SCAI-ICPS-A5A5-RPLH-PALQ'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XFH-XA2BR'; EnclosureKind = 10 }
+    '750XFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P09CFL.030.241212.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3';           SystemProductName = '750XFG'; ProductSku = 'SCAI-A5A5-A5A5-RPLP-PCFL';  BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XFG-KA3SE'; EnclosureKind = 10 }
+    '750XFH' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P09CFM.030.241212.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3';           SystemProductName = '750XFH'; ProductSku = 'SCAI-A5A5-A5A5-RPLP-PCFM';  BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XFH-XF1BR'; EnclosureKind = 10 }
+    # ── Legacy / Galaxy Book Series ──────────────────────────
+    '930SBE' = @{ BIOSVendor = 'American Megatrends Inc.';               BIOSVersion = 'P07AGW.046.230519.SH'; BIOSMajorRelease = 5; BIOSMinorRelease = 13; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Notebook 9 Series';       SystemProductName = '930SBE/931SBE/930SBV'; ProductSku = 'SCAI-A5A5-A5A5-A5A5-PAGW'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NT930SBE-K716';    EnclosureKind = 31 }
+    '930XDB' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P13RFX.071.240415.SP'; BIOSMajorRelease = 5; BIOSMinorRelease = 19; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book Series';       SystemProductName = '930XDB/931XDB/930XDY'; ProductSku = 'SCAI-A5A5-A5A5-TGL3-PRFX'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP930XDB-KF6IT';    EnclosureKind = 10 }
+    '935QDC' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P04AKJ.016.231123.PS'; BIOSMajorRelease = 5; BIOSMinorRelease = 19; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book Series';       SystemProductName = '935QDC';               ProductSku = 'SCAI-A5A5-A5A5-TGL4-PAKJ'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP935QDC-KE2US';    EnclosureKind = 31 }
     '950XGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P06RHD.270.250102.04'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book2 Pro Special Edition'; SystemProductName = '950XGK'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PRHD'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP950XGK-KA2FR'; EnclosureKind = 10 }
-    '960QFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07ALN.260.240415.SH'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 Pro 360'; SystemProductName = '960QFG'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PALN'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP964QFG-KA1IT'; EnclosureKind = 31 }
-    '960QGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P14RHB.460.250425.04'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Pro 360'; SystemProductName = '960QGK'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PRHB'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960QGK-KG1IT'; EnclosureKind = 31 }
-    '960QHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P15ALY.360.250515.02'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro 360'; SystemProductName = '960QHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PALY'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960QHA-KG2UK'; EnclosureKind = 31 }
-    '960XFG' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07RGU.330.240529.ZQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 Pro'; SystemProductName = '960XFG'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PRGU'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XFG-KC2CL'; EnclosureKind = 10 }
-    '960XFH' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07ALQ.190.240418.PS'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book3 Ultra'; SystemProductName = '960XFH'; ProductSku = 'SCAI-ICPS-A5A5-RPLH-PALQ'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XFH-XA2BR'; EnclosureKind = 10 }
-    '960XGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P12RHA.550.241030.04'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Pro'; SystemProductName = '960XGK'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PRHA'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XGK-KG1UK'; EnclosureKind = 10 }
-    '960XGL' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P08ALX.400.250306.05'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Ultra'; SystemProductName = '960XGL'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PALX'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XGL-XG2BR'; EnclosureKind = 10 }
-    '960XHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P05AMA.140.250210.01'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro'; SystemProductName = '960XHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PAMA'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XHA-KG2DE'; EnclosureKind = 10 }
+    # ── Galaxy Book4 Series ──────────────────────────────────
+    '750QGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P03RHC.170.240226.HC'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 360';        SystemProductName = '750QGK'; ProductSku = 'SCAI-ICPS-A5A5-RPLP-PRHC'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750QGK-KG2US'; EnclosureKind = 31 }
+    '750XGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P02CFP.015.240409.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4';           SystemProductName = '750XGK'; ProductSku = 'SCAI-A5A5-A5A5-RPLU-PCFP'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XGK-KG1IT'; EnclosureKind = 10 }
+    '750XGL' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P07CFP.020.250208.HQ'; BIOSMajorRelease = 5; BIOSMinorRelease = 27; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4';           SystemProductName = '750XGL'; ProductSku = 'SCAI-A5A5-A5A5-RPLU-PCFP'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750XGL-XG1BR'; EnclosureKind = 10 }
+    '940XGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P09VAG.690.240503.03'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Pro';       SystemProductName = '940XGK'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PVAG'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP940XGK-KG1FR'; EnclosureKind = 10 }
+    '960QGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P14RHB.460.250425.04'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Pro 360';    SystemProductName = '960QGK'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PRHB'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960QGK-KG1IT'; EnclosureKind = 31 }
+    '960XGK' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P12RHA.550.241030.04'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Pro';       SystemProductName = '960XGK'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PRHA'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XGK-KG1UK'; EnclosureKind = 10 }
+    '960XGL' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P08ALX.400.250306.05'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book4 Ultra';      SystemProductName = '960XGL'; ProductSku = 'SCAI-PROT-A5A5-MTLH-PALX'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XGL-XG2BR'; EnclosureKind = 10 }
+    # ── Galaxy Book5 Series ──────────────────────────────────
+    '750QHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P04RHG.270.250515.SX'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 360';        SystemProductName = '750QHA'; ProductSku = 'SCAI-A5A5-A5A5-LNLM-PRHG'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP750QHA-KA1US'; EnclosureKind = 31 }
+    '940XHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P05VAJ.280.250210.01'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro';       SystemProductName = '940XHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PVAJ'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP940XHA-KG3IT'; EnclosureKind = 10 }
+    '960QHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P15ALY.360.250515.02'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro 360';    SystemProductName = '960QHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PALY'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960QHA-KG2UK'; EnclosureKind = 31 }
+    '960XHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P05AMA.140.250210.01'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro';       SystemProductName = '960XHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PAMA'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XHA-KG2DE'; EnclosureKind = 10 }
+    # ── Galaxy Book6 Series (NEW — 2026, Intel Panther Lake) ─
+    '960XKA' = @{
+        BIOSVendor           = 'American Megatrends International, LLC.'
+        BIOSVersion          = 'P01AMB.100.260115.01'
+        BIOSMajorRelease     = 5
+        BIOSMinorRelease     = 32
+        SystemManufacturer   = 'SAMSUNG ELECTRONICS CO., LTD.'
+        SystemFamily         = 'Galaxy Book6 Pro'
+        SystemProductName    = '960XKA'
+        ProductSku           = 'SCAI-PROT-A5A5-PTLK-PAMB'
+        BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'
+        BaseBoardProduct     = 'NP960XKA-KG1US'
+        EnclosureKind        = 10
+    }
+    '960XKB' = @{
+        BIOSVendor           = 'American Megatrends International, LLC.'
+        BIOSVersion          = 'P01AMC.100.260120.01'
+        BIOSMajorRelease     = 5
+        BIOSMinorRelease     = 32
+        SystemManufacturer   = 'SAMSUNG ELECTRONICS CO., LTD.'
+        SystemFamily         = 'Galaxy Book6 Ultra'
+        SystemProductName    = '960XKB'
+        ProductSku           = 'SCAI-PROT-A5A5-PTLK-PAMC'
+        BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'
+        BaseBoardProduct     = 'NP960XKB-KG1US'
+        EnclosureKind        = 10
+    }
 }
 
 
@@ -5098,78 +5400,52 @@ function Show-ModelSelectionMenu {
     .SYNOPSIS
         Display interactive menu for Galaxy Book model selection
     .DESCRIPTION
-        Shows categorized menu of 21 Galaxy Book models and returns selected model's registry values
+        Shows categorized menu of Galaxy Book models grouped by series and returns selected model's registry values
     #>
-    
-    Write-Host "`n========================================" -ForegroundColor Cyan
-    Write-Host "  Select Galaxy Book Model to Spoof" -ForegroundColor Cyan
-    Write-Host "========================================`n" -ForegroundColor Cyan
-    
-    Write-Host "Available Models:" -ForegroundColor Yellow
-    Write-Host ""
-    
-    # Group models by family for easier selection
-    $modelGroups = @{
-        'Galaxy Book5'        = @('960XHA', '940XHA', '960QHA', '750QHA')
-        'Galaxy Book4'        = @('960XGL', '960XGK', '940XGK', '960QGK', '750XGK', '750XGL', '750QGK')
-        'Galaxy Book3'        = @('960XFH', '960XFG', '960QFG', '750XFG', '750XFH', '730QFG')
-        'Galaxy Book2/Series' = @('950XGK', '930XDB', '935QDC', '930SBE')
+    $orderedModels = [System.Collections.Generic.List[hashtable]]::new()
+    $groups = [ordered]@{
+        "Galaxy Book6 (2026 — Panther Lake)  ★ NEW" = @('960XKB', '960XKA')
+        "Galaxy Book5 (2025 — Lunar Lake)"           = @('960XHA', '940XHA', '960QHA', '750QHA')
+        "Galaxy Book4 (2024 — Meteor Lake)"          = @('960XGL', '960XGK', '940XGK', '960QGK', '750XGL', '750XGK', '950XGK')
+        "Galaxy Book3 (2023 — Raptor Lake)"          = @('960XFH', '960XFG', '730QFG', '960QFG', '750XFG', '750XFH')
+        "Legacy / Galaxy Book Series"                = @('935QDC', '930XDB', '930SBE')
     }
-    
     $index = 1
-    $modelIndex = @{}
-    
-    foreach ($group in $modelGroups.GetEnumerator() | Sort-Object { 
-            # Custom sort: Book5 > Book4 > Book3 > Book2
-            switch ($_.Key) {
-                'Galaxy Book5' { 1 }
-                'Galaxy Book4' { 2 }
-                'Galaxy Book3' { 3 }
-                'Galaxy Book2/Series' { 4 }
-            }
-        }) {
-        Write-Host "  $($group.Key):" -ForegroundColor Magenta
-        
-        foreach ($model in $group.Value) {
-            $modelData = $GalaxyBookModels[$model]
-            $displayName = "$model - $($modelData.SystemFamily)"
-            Write-Host ("    {0,2}. {1}" -f $index, $displayName) -ForegroundColor White
-            $modelIndex[$index] = $model
+    foreach ($group in $groups.Keys) {
+        $models  = $groups[$group]
+        $isNew   = $group -match '★ NEW'
+        $hdrColor = if ($isNew) { 'Cyan' } else { 'White' }
+        Write-Host ""
+        Write-Host "  $group" -ForegroundColor $hdrColor
+        foreach ($key in $models) {
+            if (-not $GalaxyBookModels.ContainsKey($key)) { continue }
+            $m = $GalaxyBookModels[$key]
+            $tag = if ($isNew) { " ★" } else { "  " }
+            Write-Host ("  {0,2}.$tag {1,-8}  {2}" -f $index, $key, $m.SystemFamily) -ForegroundColor $(if ($isNew) { 'Cyan' } else { 'Gray' })
+            $orderedModels.Add(@{ Index = $index; Key = $key; Model = $m })
             $index++
         }
-        Write-Host ""
     }
-    
-    Write-Host "  Default:" -ForegroundColor Magenta
-    Write-Host "    22. Galaxy Book3 Ultra (960XFH) - Legacy Default" -ForegroundColor Gray
     Write-Host ""
-    
-    # Get user selection
-    do {
-        $selection = Read-Host "Enter model number (1-22)"
-        
-        if ($selection -eq '22') {
-            # Legacy default - return null to use old default values
-            Write-Host "`n✓ Using legacy default: Galaxy Book3 Ultra (960XFH)" -ForegroundColor Green
-            return $null
-        }
-        
-        $selectedNumber = [int]$selection
-        if ($modelIndex.ContainsKey($selectedNumber)) {
-            $selectedModel = $modelIndex[$selectedNumber]
-            $selectedData = $GalaxyBookModels[$selectedModel]
-            
-            Write-Host "`n✓ Selected: $selectedModel - $($selectedData.SystemFamily)" -ForegroundColor Green
-            Write-Host "  Product: $($selectedData.SystemProductName)" -ForegroundColor Gray
-            Write-Host "  BIOS: $($selectedData.BIOSVersion)" -ForegroundColor Gray
-            Write-Host ""
-            
-            return $selectedData
+    Write-Host "  AMD Ryzen tip: Book6 Pro (960XKA) or Book5 Pro (960XHA) recommended" -ForegroundColor DarkYellow
+    Write-Host ""
+    $choice = 0
+    while ($choice -lt 1 -or $choice -gt $orderedModels.Count) {
+        $raw = Read-Host "  Enter model number (1-$($orderedModels.Count))"
+        if ([int]::TryParse($raw, [ref]$choice)) {
+            if ($choice -lt 1 -or $choice -gt $orderedModels.Count) {
+                Write-Host "  Invalid selection. Try again." -ForegroundColor Red
+                $choice = 0
+            }
         }
         else {
-            Write-Host "Invalid selection. Please enter a number between 1 and 22." -ForegroundColor Red
+            Write-Host "  Please enter a number." -ForegroundColor Red
         }
-    } while ($true)
+    }
+    $selected = $orderedModels[$choice - 1]
+    Write-Host ""
+    Write-Host "  ✓ Selected: $($selected.Key) — $($selected.Model.SystemFamily)" -ForegroundColor Green
+    return $GalaxyBookModels[$selected.Key]
 }
 
 function Resolve-AutonomousModel {
@@ -6525,6 +6801,13 @@ if (-not $wirelessCompatible) {
 }
 
 Write-Host ""
+
+# ── NEW in v3.2.0 ──────────────────────────────────────────────
+if (-not $script:DetectedCPU) { Write-LogHardwareInfo }
+Show-HardwareCompatibility -CPU $script:DetectedCPU `
+                           -Wifi $script:DetectedWifi `
+                           -Bt   $script:DetectedBt
+# ── end v3.2.0 ─────────────────────────────────────────────────
 
 # ==================== STEP 2: MODEL SELECTION ====================
 Write-Host "========================================" -ForegroundColor Cyan
