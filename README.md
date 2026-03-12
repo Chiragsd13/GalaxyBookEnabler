@@ -2,32 +2,33 @@
 
 > Enable Samsung Galaxy Book features on any Windows PC
 
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/Bananz0/GalaxyBookEnabler)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](https://github.com/Chiragsd13/GalaxyBookEnabler)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![PowerShell](https://img.shields.io/badge/PowerShell-7.0%2B-blue.svg)](https://github.com/PowerShell/PowerShell)
 [![Windows 11](https://img.shields.io/badge/Windows-11-0078D4.svg?logo=windows11)](https://www.microsoft.com/windows/windows-11)
-[![SSSE Support](https://img.shields.io/badge/SSSE-Integrated-purple.svg)](https://github.com/Bananz0/GalaxyBookEnabler)
-[![CodeFactor](https://www.codefactor.io/repository/github/bananz0/galaxybookenabler/badge)](https://www.codefactor.io/repository/github/bananz0/galaxybookenabler)
-![View Count](https://komarev.com/ghpvc/?username=Bananz0&repo=GalaxyBookEnabler&color=brightgreen)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/bananz0/GalaxyBookEnabler/total)
-
-> 🎉 A big thank you to [@Hydro3ia](https://github.com/Hydro3ia), [@systemsrethinking](https://github.com/systemsrethinking) and [@intini](https://github.com/intini) for sponsoring us! ❤️
+[![SSSE Support](https://img.shields.io/badge/SSSE-Integrated-purple.svg)](https://github.com/Chiragsd13/GalaxyBookEnabler)
+[![CodeFactor](https://www.codefactor.io/repository/github/chiragsd13/galaxybookenabler/badge)](https://www.codefactor.io/repository/github/chiragsd13/galaxybookenabler)
+![View Count](https://komarev.com/ghpvc/?username=Chiragsd13&repo=GalaxyBookEnabler&color=brightgreen)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Chiragsd13/GalaxyBookEnabler/total)
 
 ## Overview
 
-Galaxy Book Enabler spoofs your Windows PC as a Samsung Galaxy Book, unlocking access to Samsung's ecosystem apps like Quick Share, Multi Control, Samsung Notes, and more. The tool provides an intelligent installer with package filtering, Wi-Fi compatibility detection, and automated startup configuration.
+Galaxy Book Enabler spoofs your Windows PC as a Samsung Galaxy Book, unlocking access to Samsung's ecosystem apps like Quick Share, Multi Control, Samsung Notes, and more. The tool provides an intelligent installer with package filtering, hardware compatibility detection, diagnostic logging, and automated startup configuration.
 
-> **See what's new:** [Changelog](CHANGELOG.md) | [Releases](https://github.com/Bananz0/GalaxyBookEnabler/releases)
+> **See what's new:** [Changelog](CHANGELOG.md) | [Releases](https://github.com/Chiragsd13/GalaxyBookEnabler/releases)
 
 ## Features
 
-- **21 Galaxy Book Models** - Choose from authentic hardware profiles (Galaxy Book3/4/5, Pro, Ultra, 360)
+- **23 Galaxy Book Models** - Choose from authentic hardware profiles across Galaxy Book6/5/4/3 and legacy families
+- **New Galaxy Book6 2026 Profiles** - Includes Galaxy Book6 Ultra (`960XKB`) and Galaxy Book6 Pro (`960XKA`)
+- **AMD Ryzen Support** - Better guidance and profile recommendations for AMD systems
+- **Hardware Compatibility Report** - Detects CPU, Wi-Fi, and Bluetooth platforms before install and shows a feature support summary
+- **Vendor-ID-Based Detection** - Language-independent Wi-Fi and Bluetooth detection for more reliable compatibility checks
 - **Samsung MultiPoint Support** - Connect Galaxy Buds to multiple devices seamlessly via Samsung Settings app
 - **Auto-Elevation** - Automatically requests admin rights (supports gsudo and Windows 11 native sudo)
-- **Diagnostic Logging** - Automatic log generation for troubleshooting (saved to %TEMP%, works even with one-line install)
+- **Diagnostic Logging** - Automatic log generation for troubleshooting (saved to `%TEMP%`, works even with one-line install)
 - **Smart Package Selection** - Choose from Core, Recommended, Full Experience, or custom package combinations
 - **Package Manager** - Install or uninstall entire profiles from existing installations with status tracking
-- **Wi-Fi Compatibility Check** - Automatically detects Intel Wi-Fi adapters and warns about Quick Share limitations
 - **System Support Engine (Advanced)** - Optional experimental feature for enhanced Samsung integration (Windows 11 only)
 - **Automated Startup** - Registry spoof runs automatically on every boot
 - **Multi Control Recovery Task** - Restarts Samsung services at startup (+5 min) with a 1-minute grace period to improve Multi Control/phone reconnection reliability
@@ -48,11 +49,11 @@ Windows comes with PowerShell 5.1 by default, which is **NOT compatible**. You m
 ```powershell
 # Install PowerShell 7 (one-time setup)
 winget install Microsoft.PowerShell
-```
+````
 
 **Note:** If this is your first time using `winget`, you may need to run `winget list` first to accept the source agreements. The command may appear to stall without this step.
 
-Or download from: <https://aka.ms/powershell>
+Or download from: [https://aka.ms/powershell](https://aka.ms/powershell)
 
 After installing, use `pwsh` (PowerShell 7) instead of `powershell` (Windows PowerShell 5.1).
 
@@ -62,7 +63,7 @@ After installing, use `pwsh` (PowerShell 7) instead of `powershell` (Windows Pow
 
 ```powershell
 # Run in PowerShell 7 (pwsh)
-irm https://raw.githubusercontent.com/Bananz0/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex
+irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex
 ```
 
 *The installer will automatically request administrator privileges if needed.*
@@ -71,11 +72,12 @@ irm https://raw.githubusercontent.com/Bananz0/GalaxyBookEnabler/main/Install-Gal
 
 When running the installer on an existing installation, you have granular uninstall options:
 
-- **Reinstall (nuke + fresh install)**: Completely removes everything (preserving BIOS config), then performs a clean installation
-- **Uninstall everything**: Removes all Samsung apps, services, scheduled tasks, and configuration
-  - **Nuke Mode**: Optionally delete ALL Samsung app data (caches, settings, databases) during uninstall
-- **Uninstall apps only**: Removes all installed Samsung apps while keeping services and scheduled tasks
-- **Uninstall services only**: Removes scheduled tasks and Samsung services while keeping apps installed
+* **Reinstall (nuke + fresh install)**: Completely removes everything (preserving BIOS config), then performs a clean installation
+* **Uninstall everything**: Removes all Samsung apps, services, scheduled tasks, and configuration
+
+  * **Nuke Mode**: Optionally delete ALL Samsung app data (caches, settings, databases) during uninstall
+* **Uninstall apps only**: Removes all installed Samsung apps while keeping services and scheduled tasks
+* **Uninstall services only**: Removes scheduled tasks and Samsung services while keeping apps installed
 
 **With gsudo (recommended for seamless elevation):**
 
@@ -84,7 +86,7 @@ When running the installer on an existing installation, you have granular uninst
 winget install gerardog.gsudo
 
 # Then install Galaxy Book Enabler with automatic elevation
-irm https://raw.githubusercontent.com/Bananz0/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | gsudo pwsh
+irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | gsudo pwsh
 ```
 
 ### Manual Install
@@ -93,6 +95,13 @@ irm https://raw.githubusercontent.com/Bananz0/GalaxyBookEnabler/main/Install-Gal
 2. Run: `.\Install-GalaxyBookEnabler.ps1`
 3. Accept UAC prompt when requested
 4. Follow the interactive installer
+
+Or use:
+
+```powershell
+iwr https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 -OutFile Install-GalaxyBookEnabler.ps1
+pwsh .\Install-GalaxyBookEnabler.ps1
+```
 
 *No need to manually "Run as Administrator" - the script handles elevation automatically!*
 
@@ -128,23 +137,24 @@ Run the installer non-interactively with all options specified up front:
 ```
 
 Notes:
-- `-AutonomousPackageProfile` supports: `Core`, `Recommended`, `RecommendedPlus`, `Full`, `Everything`, `Custom`, `Skip`.
-- For `Custom`, pass `-AutonomousPackageNames` with package names/IDs.
-- `-AutonomousModel` must match a model code from the model list (e.g., `960XGL`, `960XGK`).
-- `-AutonomousAction` supports: `Install` (default), `UpdateSettings`, `UpgradeSSE`, `UninstallAll`, `Cancel`.
-- Logs default to `C:\GalaxyBook\Logs` in autonomous mode unless `-LogPath` or `-LogDirectory` is supplied.
+
+* `-AutonomousPackageProfile` supports: `Core`, `Recommended`, `RecommendedPlus`, `Full`, `Everything`, `Custom`, `Skip`
+* For `Custom`, pass `-AutonomousPackageNames` with package names/IDs
+* `-AutonomousModel` must match a model code from the model list (e.g. `960XGL`, `960XGK`, `960XKA`)
+* `-AutonomousAction` supports: `Install` (default), `UpdateSettings`, `UpgradeSSE`, `UninstallAll`, `Cancel`
+* Logs default to `C:\GalaxyBook\Logs` in autonomous mode unless `-LogPath` or `-LogDirectory` is supplied
 
 ## Reset & Repair Tools
 
 The installer includes a comprehensive suite of tools to fix common issues with Samsung apps. Select **"Reset/Repair Samsung Apps"** from the main menu (or uninstall menu) to access:
 
-- **Diagnostics**: Checks installed packages, device data files, and databases
-- **Soft Reset**: Clears app caches and temporary files (preserves login)
-- **Hard Reset**: Clears caches, device data, and settings (requires re-login)
-- **Clear Authentication**: Removes Samsung Account database and credentials
-- **Repair Permissions**: Fixes ACLs on app folders
-- **Re-register Apps**: Re-registers AppX manifests to fix launch issues
-- **Factory Reset**: Completely wipes ALL Samsung data (credentials, devices, DBs, settings)
+* **Diagnostics**: Checks installed packages, device data files, and databases
+* **Soft Reset**: Clears app caches and temporary files (preserves login)
+* **Hard Reset**: Clears caches, device data, and settings (requires re-login)
+* **Clear Authentication**: Removes Samsung Account database and credentials
+* **Repair Permissions**: Fixes ACLs on app folders
+* **Re-register Apps**: Re-registers AppX manifests to fix launch issues
+* **Factory Reset**: Completely wipes ALL Samsung data (credentials, devices, DBs, settings)
 
 ## Package Profiles
 
@@ -152,51 +162,51 @@ The installer includes a comprehensive suite of tools to fix common issues with 
 
 Essential packages for basic Samsung ecosystem functionality:
 
-- Samsung Account
-- Samsung Settings + Runtime
-- Samsung Cloud
-- Knox Matrix for Windows
-- Samsung Continuity Service
-- Samsung Intelligence Service
-- Samsung Bluetooth Sync
-- Galaxy Book Experience
+* Samsung Account
+* Samsung Settings + Runtime
+* Samsung Cloud
+* Knox Matrix for Windows
+* Samsung Continuity Service
+* Samsung Intelligence Service
+* Samsung Bluetooth Sync
+* Galaxy Book Experience
 
 ### Recommended
 
 Core packages + all fully working Samsung apps:
 
-- Quick Share (requires Intel Wi-Fi for best results)
-- Samsung Notes
-- Multi Control
-- Samsung Gallery
-- Samsung Studio + Studio for Gallery
-- Samsung Screen Recorder
-- Samsung Flow
-- SmartThings
-- Galaxy Buds Manager
-- Samsung Parental Controls
-- AI Select
-- Nearby Devices
-- Storage Share
-- Second Screen
-- Live Wallpaper
-- Galaxy Book Smart Switch
-- Samsung Pass
+* Quick Share (requires Intel Wi-Fi for best results)
+* Samsung Notes
+* Multi Control
+* Samsung Gallery
+* Samsung Studio + Studio for Gallery
+* Samsung Screen Recorder
+* Samsung Flow
+* SmartThings
+* Galaxy Buds Manager
+* Samsung Parental Controls
+* AI Select
+* Nearby Devices
+* Storage Share
+* Second Screen
+* Live Wallpaper
+* Galaxy Book Smart Switch
+* Samsung Pass
 
 ### Full Experience
 
 Recommended + apps requiring extra configuration:
 
-- Samsung Phone (needs additional setup)
-- Samsung Find (needs additional setup)
-- Quick Search (needs additional setup)
+* Samsung Phone (needs additional setup)
+* Samsung Find (needs additional setup)
+* Quick Search (needs additional setup)
 
 ### Everything
 
 All packages including non-functional ones:
 
-- ⚠️ Samsung Recovery (won't work)
-- ⚠️ Samsung Update (won't work)
+* ⚠️ Samsung Recovery (won't work)
+* ⚠️ Samsung Update (won't work)
 
 ### Custom Selection
 
@@ -204,588 +214,193 @@ Pick individual packages by category with detailed descriptions and warnings.
 
 ## Package Compatibility Matrix
 
-| Package | Status | Intel Wi-Fi AX + BT Required | Notes |
-|---------|--------|------------------------------|-------|
-| Samsung Account | ✅ Working | No | Required |
-| Samsung Settings | ✅ Working | No | Required |
-| Samsung Settings Runtime | ✅ Working | No | Required |
-| Samsung Cloud Assistant | ✅ Working | No | Required |
-| Samsung Continuity Service | ✅ Working | No | Required |
-| Samsung Intelligence Service | ✅ Working | No | Required (AI features) |
-| Samsung Bluetooth Sync | ✅ Working | No | Required |
-| Galaxy Book Experience | ✅ Working | No | Core (app catalog) |
-| Quick Share | ✅ Working | **Yes** | Requires Intel Wi-Fi AX + Intel Bluetooth |
-| Camera Share | ✅ Working |**Yes**| Requires Intel Wi-Fi AX + Intel Bluetooth |
-| Samsung Notes | ✅ Working | No | - |
-| Multi Control | 🔍 Investigating | **Yes** | Under investigation - works intermittently, not reliable on any Wi-Fi |
-| Samsung Gallery | ✅ Working | No | - |
-| Samsung Studio | ✅ Working | No | - |
-| Samsung Studio for Gallery | ✅ Working | No | - |
-| Samsung Screen Recorder | ⚠️ Working | No | Shows "optimized for Galaxy Books" |
-| Samsung Flow | ✅ Working | No | - |
-| SmartThings | ✅ Working | No | - |
-| Galaxy Buds | ✅ Working | No | - |
-| Samsung Parental Controls | ✅ Working | No | - |
-| AI Select | ✅ Working | No | - |
-| Nearby Devices | ✅ Working | No | - |
-| Storage Share | ✅ Working | No | - |
-| Second Screen | ⚠️ Limited | **Yes** | Works on Wi-Fi 6/6E/7 (AX/BE), not on Wi-Fi 5 (AC) |
-| Live Wallpaper | ✅ Working | No | - |
-| Galaxy Book Smart Switch | ✅ Working | No | - |
-| Samsung Pass | ✅ Working | No | - |
-| Samsung Device Care | ⚠️ Extra Steps | No | May not function properly |
-| Samsung Phone | ⚠️ Extra Steps | No | Configuration required |
-| Samsung Find | ⚠️ Extra Steps | No | Configuration required |
-| Quick Search | ⚠️ Extra Steps | No | Configuration required |
-| Samsung Recovery | ❌ Not Working | No | Requires genuine hardware |
-| Samsung Update | ❌ Not Working | No | Requires genuine hardware |
+| Package                      | Status           | Intel Wi-Fi + BT Required for Full Support | Notes                                                                  |
+| ---------------------------- | ---------------- | ------------------------------------------ | ---------------------------------------------------------------------- |
+| Samsung Account              | ✅ Working        | No                                         | Required                                                               |
+| Samsung Settings             | ✅ Working        | No                                         | Required                                                               |
+| Samsung Settings Runtime     | ✅ Working        | No                                         | Required                                                               |
+| Samsung Cloud Assistant      | ✅ Working        | No                                         | Required                                                               |
+| Samsung Continuity Service   | ✅ Working        | No                                         | Core service works; continuity reliability is best on Intel Wi-Fi + BT |
+| Samsung Intelligence Service | ✅ Working        | No                                         | Required (AI features)                                                 |
+| Samsung Bluetooth Sync       | ✅ Working        | No                                         | Required                                                               |
+| Galaxy Book Experience       | ✅ Working        | No                                         | Core (app catalog)                                                     |
+| Quick Share                  | ✅ Working        | **Yes**                                    | Requires Intel Wi-Fi + Intel Bluetooth                                 |
+| Camera Share                 | ✅ Working        | **Yes**                                    | Requires Intel Wi-Fi + Intel Bluetooth                                 |
+| Samsung Notes                | ✅ Working        | No                                         | -                                                                      |
+| Multi Control                | 🔍 Investigating | **Yes**                                    | Under investigation; full reliability requires Intel Wi-Fi + BT        |
+| Samsung Gallery              | ✅ Working        | No                                         | -                                                                      |
+| Samsung Studio               | ✅ Working        | No                                         | -                                                                      |
+| Samsung Studio for Gallery   | ✅ Working        | No                                         | -                                                                      |
+| Samsung Screen Recorder      | ⚠️ Working       | No                                         | Shows "optimized for Galaxy Books"                                     |
+| Samsung Flow                 | ✅ Working        | No                                         | -                                                                      |
+| SmartThings                  | ✅ Working        | No                                         | -                                                                      |
+| Galaxy Buds                  | ✅ Working        | No                                         | MultiPoint supported via Samsung Settings                              |
+| Samsung Parental Controls    | ✅ Working        | No                                         | -                                                                      |
+| AI Select                    | ✅ Working        | No                                         | -                                                                      |
+| Nearby Devices               | ✅ Working        | No                                         | -                                                                      |
+| Storage Share                | ⚠️ Limited       | **Yes**                                    | Best with Intel Wi-Fi + Intel Bluetooth                                |
+| Second Screen                | ⚠️ Limited       | **Yes**                                    | Best with Intel Wi-Fi + Intel Bluetooth                                |
+| Live Wallpaper               | ✅ Working        | No                                         | -                                                                      |
+| Galaxy Book Smart Switch     | ✅ Working        | No                                         | -                                                                      |
+| Samsung Pass                 | ✅ Working        | No                                         | -                                                                      |
+| Samsung Device Care          | ⚠️ Extra Steps   | No                                         | May not function properly                                              |
+| Samsung Phone                | ⚠️ Extra Steps   | No                                         | Configuration required                                                 |
+| Samsung Find                 | ⚠️ Extra Steps   | No                                         | Configuration required                                                 |
+| Quick Search                 | ⚠️ Extra Steps   | No                                         | Configuration required                                                 |
+| Samsung Recovery             | ❌ Not Working    | No                                         | Requires genuine hardware                                              |
+| Samsung Update               | ❌ Not Working    | No                                         | Requires genuine hardware                                              |
 
 ## System Requirements
 
 ### Required
 
-- Windows 10/11 (64-bit)
-- PowerShell 7.0 or later
-- Administrator privileges
-- Active Internet connection
+* Windows 10/11 (64-bit)
+* PowerShell 7.0 or later
+* Administrator privileges
+* Active Internet connection
 
 ### Recommended for Full Experience
 
-- Intel Wi-Fi adapter (for Quick Share)
-- 8GB RAM or more
-- Samsung account
+* Intel Wi-Fi adapter (for Quick Share and related Wi-Fi Direct features)
+* Intel Bluetooth adapter
+* 8GB RAM or more
+* Samsung account
 
 ### System Support Engine (Optional Advanced Feature)
 
-- **Windows 11 (Build 22000+)** - Required
-- **x64 architecture** - ARM not supported
-- **Advanced users only** - Involves binary patching and service creation
-- **Experimental** - May cause system instability or trigger antivirus warnings
+* **Windows 11 (Build 22000+)** - Required
+* **x64 architecture** - Recommended
+* **ARM** - Experimental warning shown, not officially supported
+* **Advanced users only** - Involves binary patching and service creation
+* **Experimental** - May cause system instability or trigger antivirus warnings
 
 ## Wi-Fi & Bluetooth Compatibility
 
-Samsung apps require **Intel Wi-Fi** and **Intel Bluetooth** adapters for full wireless features. Compatibility varies by Wi-Fi generation:
+Galaxy Book Enabler now performs a **hardware compatibility check before installation**. The installer detects your **CPU**, **Wi-Fi**, and **Bluetooth** platforms and shows a feature support summary before you choose a profile.
+
+### Detected Hardware Platforms
+
+#### CPU detection
+
+* **Intel** - Full support
+* **AMD Ryzen** - Supported for many apps and features, with hardware-dependent limitations for some wireless features
+* **ARM** - Experimental warning shown during install
+
+#### Wi-Fi detection
+
+The installer checks vendor IDs for:
+
+* **Intel** (`8086`)
+* **MediaTek / AMD RZ-series** (`14C3`)
+* **Realtek** (`10EC`)
+* **Qualcomm** (`168C`, `17CB`)
+
+#### Bluetooth detection
+
+The installer checks vendor IDs for:
+
+* **Intel** (`8087`)
+* **MediaTek** (`0E8D`)
+* **Realtek** (`0BDA`)
+
+### Feature Support Summary
+
+* **Samsung Notes / Bixby / AI Select** - Works regardless of Wi-Fi platform
+* **Galaxy Buds / MultiPoint** - Works regardless of Wi-Fi platform
+* **Samsung Settings / Knox / Pass** - Works regardless of Wi-Fi platform
+* **Quick Share / Camera Share / Storage Share** - Require Intel Wi-Fi for full support
+* **Multi Control / Second Screen** - Most reliable with Intel Wi-Fi + Intel Bluetooth
+* **Continuity Service** - Best results with Intel Wi-Fi + Intel Bluetooth
+
+### AMD Ryzen Systems
+
+AMD systems are supported, but the best experience depends heavily on the Wi-Fi and Bluetooth chipset in the machine.
+
+* If your AMD system has **Intel Wi-Fi + Intel Bluetooth**, wireless Samsung features have the best chance of working properly
+* If your AMD system uses **MediaTek**, **Realtek**, or **Qualcomm** Wi-Fi, expect **Samsung Notes**, **Galaxy Buds**, **Samsung Settings**, **Knox**, and similar apps to work, but **Quick Share**, **Camera Share**, and **Storage Share** are not expected to work correctly
+* For AMD systems, the installer guidance currently favors **Galaxy Book5 Pro (`960XHA`)** or **Galaxy Book6 Pro (`960XKA`)** profiles
 
 ### Wi-Fi Compatibility by Generation
 
-| Generation | Adapters | Quick Share | Multi Control | Second Screen | Camera Share | Storage Share |
-|------------|----------|-------------|---------------|---------------|--------------|---------------|
-| **Wi-Fi 7 (BE)** | BE200, BE201, BE202 | ✅ Full | 🔍 Investigating | ✅ Full | ✅ Full | ✅ Full |
-| **Wi-Fi 6E (AX)** | AX210, AX211, AX411 | ✅ Full | 🔍 Investigating | ✅ Full | ✅ Full | ✅ Full |
-| **Wi-Fi 6 (AX)** | AX201, AX200 | ✅ Full | 🔍 Investigating | ✅ Full | ✅ Full | ✅ Full |
-| **Wi-Fi 5 (AC)** | 9260, 9560, 8265, 8260 | ✅ Works | ❌ Not Working | ❌ Not Working | ✅ Works | ✅ Works |
-| **Wireless-AC (Legacy)** | 7265, 7260, 3168, 3165 | ❓ Not Tested | ❌ Not Working | ❌ Not Working | ❓ Not Tested | ❓ Not Tested |
-| **Non-Intel** | Realtek, MediaTek, Qualcomm | ❌ | ❌ | ❌ | ❌ | ❌ |
+The table below focuses on the wireless Samsung features that depend on Wi-Fi Direct and related stack behavior.
+
+| Generation               | Adapters                    | Quick Share  | Multi Control    | Second Screen | Camera Share | Storage Share |
+| ------------------------ | --------------------------- | ------------ | ---------------- | ------------- | ------------ | ------------- |
+| **Wi-Fi 7 (BE)**         | BE200, BE201, BE202         | ✅ Full       | 🔍 Investigating | ✅ Full        | ✅ Full       | ✅ Full        |
+| **Wi-Fi 6E (AX)**        | AX210, AX211, AX411         | ✅ Full       | 🔍 Investigating | ✅ Full        | ✅ Full       | ✅ Full        |
+| **Wi-Fi 6 (AX)**         | AX201, AX200                | ✅ Full       | 🔍 Investigating | ✅ Full        | ✅ Full       | ✅ Full        |
+| **Wi-Fi 5 (AC)**         | 9260, 9560, 8265, 8260      | ✅ Works      | ❌ Not Working    | ❌ Not Working | ✅ Works      | ✅ Works       |
+| **Wireless-AC (Legacy)** | 7265, 7260, 3168, 3165      | ❓ Not Tested | ❌ Not Working    | ❌ Not Working | ❓ Not Tested | ❓ Not Tested  |
+| **Non-Intel**            | Realtek, MediaTek, Qualcomm | ❌            | ❌ / Limited      | ❌ / Limited   | ❌            | ❌             |
 
 ### Intel Wi-Fi Product Families
 
 #### Wi-Fi 7 (BE) - Full Compatibility ✅
 
-| Product | Launch | Max Speed | Notes |
-|---------|--------|-----------|-------|
-| Intel Wi-Fi 7 BE200 | Q3'23 | 5.8 Gbps | 320 MHz, 4096 QAM |
-| Intel Wi-Fi 7 BE201 | Q2'24 | 5.8 Gbps | Double Connect Technology |
-| Intel Wi-Fi 7 BE202 | Q3'23 | 2.4 Gbps | 160 MHz, 1024 QAM |
+| Product             | Launch | Max Speed | Notes                     |
+| ------------------- | ------ | --------- | ------------------------- |
+| Intel Wi-Fi 7 BE200 | Q3'23  | 5.8 Gbps  | 320 MHz, 4096 QAM         |
+| Intel Wi-Fi 7 BE201 | Q2'24  | 5.8 Gbps  | Double Connect Technology |
+| Intel Wi-Fi 7 BE202 | Q3'23  | 2.4 Gbps  | 160 MHz, 1024 QAM         |
 
 #### Wi-Fi 6E (AX) - Full Compatibility ✅
 
-| Product | Launch | Max Speed | Notes |
-|---------|--------|-----------|-------|
-| Intel Wi-Fi 6E AX411 (Gig+) | Q4'21 | ~3.0 Gbps | Double Connect Technology |
-| Intel Wi-Fi 6E AX211 (Gig+) | Q3'21 | 2.4 Gbps | Most common 6E adapter |
-| Intel Wi-Fi 6E AX210 (Gig+) | Q4'20 | 2.4 Gbps | First consumer 6E |
+| Product                     | Launch | Max Speed | Notes                     |
+| --------------------------- | ------ | --------- | ------------------------- |
+| Intel Wi-Fi 6E AX411 (Gig+) | Q4'21  | ~3.0 Gbps | Double Connect Technology |
+| Intel Wi-Fi 6E AX211 (Gig+) | Q3'21  | 2.4 Gbps  | Most common 6E adapter    |
+| Intel Wi-Fi 6E AX210 (Gig+) | Q4'20  | 2.4 Gbps  | First consumer 6E         |
 
 #### Wi-Fi 6 (AX) - Full Compatibility ✅
 
-- Intel Wi-Fi 6 AX201/AX200
-- Intel Killer Wi-Fi 6 variants
+* Intel Wi-Fi 6 AX201/AX200
+* Intel Killer Wi-Fi 6 variants
 
 #### Wi-Fi 5 / Wireless-AC - Limited Compatibility ⚠️
 
-| Product Family | Quick Share | Multi Control | Second Screen |
-|----------------|-------------|---------------|---------------|
-| Intel Wireless-AC 9000 Series (9260, 9560) | ✅ Works | ❌ No | ❌ No |
-| Intel Wireless-AC 8000 Series (8265, 8260) | ✅ Works | ❌ No | ❌ No |
+| Product Family                             | Quick Share | Multi Control | Second Screen |
+| ------------------------------------------ | ----------- | ------------- | ------------- |
+| Intel Wireless-AC 9000 Series (9260, 9560) | ✅ Works     | ❌ No          | ❌ No          |
+| Intel Wireless-AC 8000 Series (8265, 8260) | ✅ Works     | ❌ No          | ❌ No          |
 
 **AC Limitations:**
-- Multi Control does not work
-- Second Screen does not work (WiFi Direct uses 802.11n - Samsung limitation)
-- May show "A software or driver update is required" error in Quick Share
+
+* Multi Control does not work reliably
+* Second Screen does not work
+* Quick Share may show driver or software update errors on some systems
 
 #### Legacy Wireless-AC - Not Tested ❓
 
-| Product Family | Status |
-|----------------|--------|
+| Product Family              | Status                    |
+| --------------------------- | ------------------------- |
 | Intel Wireless-AC 7265/7260 | Not tested - may not work |
 | Intel Wireless-AC 3168/3165 | Not tested - may not work |
 
 > **⚠️ Legacy Warning**: These older adapters may not work if:
-> - Driver hasn't been updated since 2020 (e.g., Windows 8.1 drivers v21.40.5)
-> - Product is discontinued without Windows 10/11 driver support
-> - Adapter doesn't support modern Wi-Fi Direct features
+>
+> * Driver hasn't been updated since 2020
+> * Product is discontinued without Windows 10/11 driver support
+> * Adapter doesn't support modern Wi-Fi Direct features
 
 ### Multi Control Status: Under Investigation 🔍
 
-Multi Control is currently **not working reliably** on any Intel Wi-Fi generation:
-- Works intermittently on Wi-Fi 6/6E/7
-- Completely non-functional on Wi-Fi 5 (AC)
-- Investigation ongoing - may be Samsung server-side issue
+Multi Control is currently **not working reliably** on any platform:
 
-### Non-Intel Wi-Fi (Not Working) ❌
+* Works intermittently on some Intel Wi-Fi 6/6E/7 systems
+* Completely unreliable on many non-Intel setups
+* Investigation is ongoing
 
-- Realtek adapters
-- MediaTek adapters
-- Qualcomm adapters
-- Broadcom adapters
+### Intel Bluetooth (Required for Full Wireless Features) ✅
 
-### Intel Bluetooth (Required) ✅
-
-All wireless features also require an **Intel Bluetooth radio** (not just Wi-Fi). Third-party Bluetooth adapters (USB dongles, etc.) will cause features to fail with unhelpful errors.
+All major wireless features also require an **Intel Bluetooth radio** in addition to compatible Wi-Fi. Third-party Bluetooth adapters and mismatched wireless stacks may cause features to fail with unclear errors.
 
 ### Alternative for Non-Intel Users
 
 If you don't have Intel Wi-Fi **and** Intel Bluetooth, consider **Google Nearby Share** as an alternative:
 
-- Works with any Wi-Fi adapter
-- Similar file-sharing functionality
-- Cross-platform support (Windows, Android, ChromeOS)
-- Download: [Google Nearby Share](https://www.android.com/better-together/nearby-share-app/)
-
-## AI Select (Smart Select)
-
-AI Select is Samsung's intelligent selection tool. The installer creates launcher scripts in `C:\GalaxyBook\` for easy hotkey binding.
-
-### Launch URI
-
-```shell
-shell:AppsFolder\SAMSUNGELECTRONICSCO.LTD.SmartSelect_3c1yjt4zspk6g!App
-```
-
-### Method 1: PowerToys URI (Recommended - Fastest)
-
-This method launches AI Select instantly with a single key press:
-
-1. Install [PowerToys](https://aka.ms/getPowerToys) from Microsoft Store
-2. Open PowerToys → Keyboard Manager
-3. **Remap a key** (e.g., `Right Alt` → `Win+Ctrl+Alt+S`)
-   - This creates an unused intermediate shortcut
-4. **Remap a shortcut** → `Win+Ctrl+Alt+S` → **Open URI**
-   - URI: `shell:AppsFolder\SAMSUNGELECTRONICSCO.LTD.SmartSelect_3c1yjt4zspk6g!App`
-5. Press Right Alt to instantly launch AI Select!
-
-### Method 2: PowerToys Run Program
-
-1. Install PowerToys
-2. Keyboard Manager → Remap a shortcut
-3. Set shortcut (e.g., `Ctrl+Shift+S`) → Action: **Run Program**
-4. Program: `powershell.exe`
-5. Args: `-WindowStyle Hidden -File "C:\GalaxyBook\AISelect.ps1"`
-
-### Method 3: AutoHotkey (AHK)
-
-For advanced users who prefer AutoHotkey:
-
-```autohotkey
-; AI Select launcher - save as AISelect.ahk
-#Requires AutoHotkey v2.0
-
-; Press Right Alt to launch AI Select
-RAlt::Run "shell:AppsFolder\SAMSUNGELECTRONICSCO.LTD.SmartSelect_3c1yjt4zspk6g!App"
-```
-
-### Method 4: Desktop Shortcut (Standard)
-
-1. Find the "AI Select.lnk" on your Desktop (created by installer)
-2. Right-click → Properties
-3. Click in the "Shortcut key" field
-4. Press your desired key combination (e.g., Ctrl+Alt+S)
-5. Click OK
-
-> **Note:** Desktop shortcuts use explorer.exe which adds slight overhead. PowerToys URI or AHK methods are faster.
-
-### Manual Identity Generation
-
-If you need to generate high-fidelity DMI strings manually for OpenCore or generic spoofing, use the provided utility:
-
-```powershell
-.\Generate-SamsungIdentity.ps1 -Profile Book6Ultra -IncludeFullBiosVersion
-.\Generate-SamsungIdentity.ps1 -Profile Book6Pro -IncludeFullBiosVersion -WriteConfigPlist -ConfigPath "D:\\EFI\\OC\\config.plist"
-```
-
-This generates randomized but internally consistent `SystemSKU`, `BIOSVersion`, `SerialNumber`, `ROM`, and `SystemUUID` values using Samsung's documented patterns. It also derives `BoardProduct` from randomized model/suffix pairs.
-
-When `-WriteConfigPlist` is used, the script creates a timestamped `.bak` copy alongside the original file before writing updates.
-
-**Region selection** defaults to your Windows locale. Ireland (`IE`) maps to the UK (`UK`) by default. If you need a closer match, set `-CountryCode` or `-RegionCode`. Optional `-UseGeoIp` uses the public ipapi.co endpoint (no API key) to resolve country based on IP. This can affect region-locked features; for example, Samsung Phone app Messages has been observed to be available in the US but not in the UK.
-
-## 🔧 How It Works
-
-1. **Registry Spoof**: Modifies system registry to identify as "Samsung Galaxy Book3 Ultra"
-2. **Startup Tasks**: Creates scheduled tasks that run on every boot
-3. **Multi Control Recovery**: Runs `Init-SamsungMultiControlOnLogin.ps1` at startup +5 minutes, then waits 1 minute before restarting Samsung services
-4. **Package Installation**: Installs selected Samsung apps from Microsoft Store
-5. **Configuration**: Sets up shortcuts and configuration files
-
-**Available Models**
-
-| Model   | Family                              | Gen  |
-|---------|-------------------------------------|------|
-| 960XKB  | Galaxy Book6 Ultra                  | 2026 |
-| 960XKA  | Galaxy Book6 Pro                    | 2026 |
-| 960XHA  | Galaxy Book5 Pro                    | 2025 |
-| 940XHA  | Galaxy Book5 Pro                    | 2025 |
-| 960QHA  | Galaxy Book5 Pro 360                | 2025 |
-| 750QHA  | Galaxy Book5 360                    | 2025 |
-| 960XGL  | Galaxy Book4 Ultra                  | 2024 |
-| 960XGK  | Galaxy Book4 Pro                    | 2024 |
-| 940XGK  | Galaxy Book4 Pro                    | 2024 |
-| 960QGK  | Galaxy Book4 Pro 360                | 2024 |
-| 750XGK  | Galaxy Book4                        | 2024 |
-| 750XGL  | Galaxy Book4                        | 2024 |
-| 750QGK  | Galaxy Book4 360                    | 2024 |
-| 960XFH  | Galaxy Book3 Ultra                  | 2023 |
-| 960XFG  | Galaxy Book3 Pro                    | 2023 |
-| 960QFG  | Galaxy Book3 Pro 360                | 2023 |
-| 750XFG  | Galaxy Book3                        | 2023 |
-| 750XFH  | Galaxy Book3                        | 2023 |
-| 730QFG  | Galaxy Book3 360                    | 2023 |
-| 950XGK  | Galaxy Book2 Pro Special Edition    | 2022 |
-| 930XDB  | Galaxy Book Series                  | 2021 |
-| 935QDC  | Galaxy Book Series                  | 2021 |
-| 930SBE  | Notebook 9 Series                   | 2020 |
-
-**How Model Selection Works:**
-
-1. During installation, you'll see a categorized menu of all 21 models
-2. Models are grouped by generation (Book5 > Book4 > Book3 > Book2)
-3. Each model has authentic BIOS/DMI values extracted from real hardware
-4. Select your preferred model to spoof
-5. All 11 registry values are automatically configured
-
-**Example Selection:**
-
-```preview
-========================================
-  Select Galaxy Book Model to Spoof
-========================================
-
-Available Models:
-
-  Galaxy Book5:
-     1. 960XHA - Galaxy Book5 Pro
-     2. 940XHA - Galaxy Book5 Pro
-     3. 960QHA - Galaxy Book5 Pro 360
-     4. 750QHA - Galaxy Book5 360
-
-  Galaxy Book4:
-     5. 960XGL - Galaxy Book4 Ultra
-     6. 960XGK - Galaxy Book4 Pro
-     7. 940XGK - Galaxy Book4 Pro
-     [... more models ...]
-
-Enter model number (1-22): 5
-
-✓ Selected: 960XGL - Galaxy Book4 Ultra
-  Product: 960XGL
-  BIOS: P08ALX.400.250306.05
-```
-
-## Installation Guide
-
-### Step-by-Step
-
-1. **Run Installer as Administrator**
-
-   ```powershell
-   .\Install-GalaxyBookEnabler.ps1
-   ```
-
-2. **System Compatibility Check**
-   - Installer detects your Wi-Fi adapter
-   - Shows compatibility status for Quick Share
-
-3. **File Setup**
-   - Creates installation directory: `%USERPROFILE%\.galaxy-book-enabler`
-   - Detects legacy v1.x installation (if present)
-   - **Preserves custom BIOS values** from old QS.bat (Galaxy Book4 Ultra, GB4 Pro, etc.)
-   - Generates registry spoof script with preserved or default values
-   - Cleans up old installation files
-   - Saves configuration file
-
-4. **Startup Task Creation**
-   - Creates scheduled task "GalaxyBookEnabler"
-   - Runs automatically on system startup
-   - Uses SYSTEM privileges for registry access
-   - Creates scheduled task "GalaxyBookEnabler-MultiControlInit"
-   - Runs `Init-SamsungMultiControlOnLogin.ps1` at startup +5 minutes
-   - Adds a 1-minute grace period before Samsung service restarts
-
-5. **AI Select Configuration (Optional)**
-   - Create desktop shortcut
-   - Set up keyboard shortcut manually
-
-6. **System Support Engine (Optional/Advanced)**
-   - **Windows 11 only** - Experimental feature
-   - Downloads Samsung System Support Service CAB from Microsoft Update Catalog
-   - Extracts and patches binary executable
-   - Installs to `C:\GalaxyBook`
-   - Creates `GBeSupportService` Windows service (LocalSystem, Auto startup)
-   - Installs driver automatically via pnputil
-   - **Use with caution** - May trigger antivirus, requires advanced troubleshooting
-
-7. **Package Selection**
-   - Choose installation profile
-   - Review package list
-   - Confirm installation
-
-8. **Apply Registry Spoof**
-   - Immediate spoof application
-   - No reboot required for testing
-
-9. **Launch Galaxy Book Experience**
-   - Automatically opens after installation
-   - Explore available Samsung apps
-   - Access app catalog at any time
-
-10. **Reboot**
-
-- Restart your PC for full activation
-- Sign into Samsung Account
-- Configure Samsung apps
-
-## Troubleshooting
-
-### System Support Engine Issues
-
-- **Service not starting**: Check Event Viewer for errors
-- **Antivirus blocking**: Add `C:\GalaxyBook` to exclusions
-- **Driver not installing**: Manually install via Device Manager
-- **Samsung Settings not appearing**: Wait 5-10 minutes after reboot for background installation
-- **Service verification**: Run `Get-Service 'GBeSupportService'` in PowerShell
-- **Only for Windows 11**: Feature requires Windows 11 Build 22000 or higher
-
-### Quick Share Not Working
-
-- **Check Wi-Fi adapter type**: Quick Share requires **Intel Wi-Fi AX** (not AC)
-- **Check Bluetooth adapter**: Quick Share requires **Intel Bluetooth** radio
-- **AC card error**: If you see "A software or driver update is required", your Intel AC card is not supported
-- **AC9560 confirmed working**: Intel AC9560 has been tested and works with Quick Share
-- **Third-party Bluetooth**: USB Bluetooth dongles or non-Intel Bluetooth will cause failures
-- **Verify installation**: Check if app is properly installed
-- **Sign in**: Ensure you're signed into Samsung Account
-- **Alternative**: Use Google Nearby Share for non-Intel hardware
-
-### Apps Not Appearing
-
-- **Reboot required**: Some apps need a system restart
-- **Registry spoof**: Verify scheduled tasks are running
-- **Manual install**: Try installing apps individually from Microsoft Store
-
-### Multi Control Stops Working After Reboot
-
-- **Built-in recovery task**: Check Task Scheduler for `GalaxyBookEnabler-MultiControlInit`
-- **Expected timing**: Task starts at boot +5 minutes, script then waits 1 minute before restarting Samsung services
-- **Run manually**: `pwsh -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\.galaxy-book-enabler\Init-SamsungMultiControlOnLogin.ps1"`
-- **Community context**: Added from user reports in [Discussion #76](https://github.com/Bananz0/GalaxyBookEnabler/discussions/76)
-- **Manual Task Scheduler fallback**:
-   - Trigger: At startup (Delay task for 5 minutes)
-   - Action: Program `pwsh.exe`
-   - Arguments: `-NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\.galaxy-book-enabler\Init-SamsungMultiControlOnLogin.ps1" -GracePeriodSeconds 60`
-   - Security: Run with highest privileges as `SYSTEM`
-
-### Scheduled Task Not Running
-
-- **Check Task Scheduler**: Look for both `GalaxyBookEnabler` and `GalaxyBookEnabler-MultiControlInit`
-- **Permissions**: Tasks must run as SYSTEM with highest privileges
-- **Reinstall**: Run installer again to recreate task
-
-### Registry Spoof Not Persistent
-
-- **Verify startup task**: Check if task is enabled in Task Scheduler
-- **Run manually**: Execute `%USERPROFILE%\.galaxy-book-enabler\GalaxyBookSpoof.bat`
-- **Check logs**: Review Task Scheduler history
-
-### Installation Fails
-
-- **Admin rights**: Must run PowerShell as Administrator
-- **Winget issues**: Update winget: `winget upgrade --all`
-- **Network**: Verify internet connection for package downloads
-- **Antivirus**: Temporarily disable if blocking installation
-
-## FAQ
-
-**Q: Is this safe to use?**
-A: Yes, it only modifies volatile registry keys that reset on reboot. Scheduled tasks ensure the spoof and Multi Control service restart run automatically.
-
-**Q: Will this void my warranty?**
-A: This doesn't modify hardware or firmware. It only changes registry values.
-
-**Q: Can I use this on a real Samsung Galaxy Book?**
-A: There's no need - these features already work on genuine Galaxy Books.
-
-**Q: Why does Quick Share need Intel Wi-Fi?**
-A: Samsung designed Quick Share to work specifically with Intel's Wi-Fi Direct implementation. You need both **Intel Wi-Fi AX** (not AC) and **Intel Bluetooth** radios. Third-party Bluetooth adapters or Intel AC cards won't work.
-
-**Q: Can I uninstall specific packages later?**
-A: Yes, uninstall Samsung apps through Windows Settings → Apps like any other app.
-
-**Q: Do I need to keep the installer after installation?**
-A: No, but keep it if you want to update or uninstall later.
-
-**Q: Will this work on ARM Windows devices?**
-A: Not tested. The script is designed for x64 Windows systems.
-
-**Q: Can I customize the spoofed device model?**
-A: Advanced users can edit the batch file in the installation directory.
-
-## Updating
-
-### Check for Updates
-
-The installer detects if you have an older version installed and offers to update.
-
-### Manual Update
-
-```powershell
-# Download latest version
-irm https://raw.githubusercontent.com/Bananz0/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex
-```
-
-### What Gets Updated
-
-- Registry spoof script
-- Scheduled tasks configuration
-- Multi Control init script (`Init-SamsungMultiControlOnLogin.ps1`)
-- Package definitions
-- Helper functions
-
-## Uninstallation
-
-### Complete Removal
-
-```powershell
-.\Install-GalaxyBookEnabler.ps1 -Uninstall
-```
-
-### What Gets Removed
-
-- Scheduled tasks (`GalaxyBookEnabler`, `GalaxyBookEnabler-MultiControlInit`)
-- Installation directory (`%USERPROFILE%\.galaxy-book-enabler`)
-- Desktop shortcuts (if created)
-
-### What Stays
-
-- Installed Samsung apps (uninstall manually if desired)
-- Registry spoof (clears after reboot)
-
-### Manual Cleanup (if needed)
-
-```powershell
-# Remove scheduled tasks
-Unregister-ScheduledTask -TaskName "GalaxyBookEnabler" -Confirm:$false
-Unregister-ScheduledTask -TaskName "GalaxyBookEnabler-MultiControlInit" -Confirm:$false
-
-# Remove installation folder
-Remove-Item "$env:USERPROFILE\.galaxy-book-enabler" -Recurse -Force
-
-# Reboot to clear registry spoof
-Restart-Computer
-```
-
-## Privacy & Security
-
-- **No telemetry**: Script doesn't send any data
-- **Local only**: All operations are local to your PC
-- **Open source**: Full code is available for review
-- **No network access**: Script doesn't make outbound connections (except winget for packages)
-- **Reversible**: Complete uninstall available
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for our development process and CI requirements.
-
-1. Fork the repository
-2. Create a feature branch
-3. Test thoroughly
-4. Submit a pull request
-
-## Known Limitations
-
-- **Quick Share**: Requires Intel Wi-Fi AX adapter **AND** Intel Bluetooth radio (Some AC cards don't work)
-- **System Support Engine**: Windows 11 only, experimental, may cause instability
-- **Samsung Recovery**: Will never work (requires genuine Samsung hardware)
-- **Samsung Update**: Will never work (requires genuine Samsung hardware)
-- **Some features**: May require additional Samsung account setup
-- **Registry reset**: Spoof clears on reboot (handled by scheduled tasks)
-
-## Reporting Issues
-
-When reporting issues, please include:
-
-- **Installation log file** (automatically created at `%TEMP%\GalaxyBookEnabler_*.log`)
-  - The script creates a detailed diagnostic log during installation
-  - This log is created even when running via `irm | iex`
-  - Find it by pressing Win+R, typing `%TEMP%`, and looking for the newest `GalaxyBookEnabler_*.log` file
-  - Attach this file to your issue report for faster troubleshooting
-- Windows version (Settings → System → About)
-- PowerShell version (`$PSVersionTable.PSVersion`)
-- Wi-Fi adapter model (Device Manager → Network adapters)
-- Bluetooth adapter model (Device Manager → Bluetooth)
-- Error messages or screenshots
-- Steps to reproduce
-
-**Use our issue templates** when creating a new issue on GitHub:
-- 🐛 [Bug Report](.github/ISSUE_TEMPLATE/bug_report.yml) - For installation problems or features not working
-- 📊 [Hardware Compatibility Report](.github/ISSUE_TEMPLATE/hardware_compatibility.yml) - Share your hardware compatibility results
-- ✨ [Feature Request](.github/ISSUE_TEMPLATE/feature_request.yml) - Suggest new features
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Credits
-
-- Original script by [@obrobrio2000](https://github.com/obrobrio2000)
-- Enhanced and maintained by [@Bananz0](https://github.com/Bananz0)
-- Inspired by [eGPUae](https://github.com/bananz0/eGPUae) architecture
-
-## Supporters
-
-A huge thanks to the following people for supporting this project ❤️ :
-
-- **@Hydro3ia**
-- **@systemsrethinking**
-- **@intini**
-
-### Bluetooth Device Removal
-
-- [@m-a-x-s-e-e-l-i-g](https://github.com/m-a-x-s-e-e-l-i-g) - [powerBTremover (fork)](https://github.com/m-a-x-s-e-e-l-i-g/powerBTremover)
-- [@RS-DU34](https://github.com/RS-DU34) - [powerBTremover (original)](https://github.com/RS-DU34/powerBTremover)
-
-## Disclaimer
-
-**IMPORTANT**:
-
-- This tool is for educational and personal use only
-- Not affiliated with or endorsed by Samsung Electronics
-- Use at your own risk
-- Author is not responsible for any issues or damages
-- Samsung may update their apps to detect or block this method
-- Features may break with future Samsung app updates
-
-## Legal Notice
-
-### Interoperability Notice (EU)
-
-This software is developed for the purpose of achieving interoperability between Samsung software services and third-party hardware platforms (non-Samsung PCs), in accordance with the rights granted under the EU Computer Programs Directive (2009/24/EC). It allows users to exercise their right to use legally obtained software on the hardware of their choice by resolving arbitrary compatibility checks.
-
-## Links
-
-- [GitHub Repository](https://github.com/Bananz0/GalaxyBookEnabler)
-- [Issues & Bug Reports](https://github.com/Bananz0/GalaxyBookEnabler/issues)
-- [Changelog](CHANGELOG.md)
-- [Google Nearby Share Alternative](https://www.android.com/better-together/nearby-share-app/)
-
----
-
-> Made with ❤️ for the Samsung ecosystem enthusiasts
+* Works with any Wi-Fi adapter
+* Similar file-sharing functionality
+* Cross-platform support (Windows, Android, ChromeOS)
+* Download: [Google Nearby Share](https://www.android.com/better-together/nearby-share-app/)
+
+[1]: https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/README.md "raw.githubusercontent.com"
