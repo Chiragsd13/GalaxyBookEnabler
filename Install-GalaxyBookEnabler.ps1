@@ -1,76 +1,35 @@
-﻿# Galaxy Book Enabler Installer/Uninstaller
+# Galaxy Book Enabler Installer/Uninstaller
 # Enables Samsung Galaxy Book features on non-Galaxy Book devices
 
 <#
 .SYNOPSIS
-    Galaxy Book Enabler - Enable Samsung Galaxy Book features on any Windows PC
+Galaxy Book Enabler - Enable Samsung Galaxy Book features on any Windows PC
 
 .DESCRIPTION
-    This tool spoofs your device as a Samsung Galaxy Book to enable features like:
-    - Quick Share          (Intel Wi-Fi + Intel Bluetooth required)
-    - Camera Share         (Intel Wi-Fi + Intel Bluetooth required)
-    - Storage Share        (Intel Wi-Fi + Intel Bluetooth required)
-    - Multi Control        (Intel Wi-Fi + Intel Bluetooth — intermittent on all hardware)
-    - Second Screen        (Intel Wi-Fi 6/6E/7 + Intel Bluetooth)
-    - Samsung Notes / Bixby / AI Select  (works on ALL hardware, incl. AMD Ryzen)
-    - Galaxy Buds MultiPoint             (works on ALL hardware)
-    - Samsung Settings / Knox / Pass     (works on ALL hardware)
-    - System Support Engine (advanced/experimental)
-    AMD Ryzen support:
-    - All non-Wi-Fi features (Notes, Buds, Settings) work fully on AMD.
-    - Quick Share / Camera Share / Storage Share require Intel Wi-Fi (even on AMD CPUs).
-    - Continuity Service clipboard sync is under investigation on AMD (Issue #62).
-    - AMD systems with Intel Wi-Fi cards (separate chip) are treated as Intel Wi-Fi.
-    Supported profiles (23 total):
-    - Galaxy Book6 Ultra 2026 (960XKB) ★ NEW
-    - Galaxy Book6 Pro  2026 (960XKA) ★ NEW
-    - Galaxy Book5 Pro / 5 Pro 360 / 5 360
-    - Galaxy Book4 Ultra / Pro / Pro 360
-    - Galaxy Book3 Ultra / Pro / Pro 360
-    - Galaxy Book (legacy series back to Notebook 9)
-    It handles automatic startup configuration and Wi-Fi/Bluetooth compatibility detection.
-
-.PARAMETER Uninstall
-    Removes the Galaxy Book Enabler from your system.
-
-.PARAMETER UpdateSettings
-    Reinstalls Samsung Settings with a fresh driver version.
-    Cleans up existing installation, uninstalls Samsung Settings apps,
-    fetches chosen SSSE version, patches, adds to DriverStore, and reinstalls apps.
-
-.PARAMETER FullyAutonomous
-    Runs a non-interactive install with all choices provided via parameters.
+This tool spoofs your device as a Samsung Galaxy Book to enable Samsung apps and features.
 
 .EXAMPLE
-    .\Install-GalaxyBookEnabler.ps1
-    Installs the Galaxy Book Enabler with interactive configuration.
+.\Install-GalaxyBookEnabler.ps1
 
 .EXAMPLE
-    .\Install-GalaxyBookEnabler.ps1 -Uninstall
-    Removes the Galaxy Book Enabler from your system.
+.\Install-GalaxyBookEnabler.ps1 -Uninstall
 
 .EXAMPLE
-    .\Install-GalaxyBookEnabler.ps1 -UpdateSettings
-    Reinstalls Samsung Settings with a fresh driver/SSSE version.
+.\Install-GalaxyBookEnabler.ps1 -UpdateSettings
 
 .EXAMPLE
-    .\Install-GalaxyBookEnabler.ps1 -TestMode
-    Runs in test mode without applying registry changes, creating tasks, or installing packages.
+.\Install-GalaxyBookEnabler.ps1 -TestMode
 
 .EXAMPLE
-    irm https://raw.githubusercontent.com/Bananz0/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex
-    Installs in one line from GitHub.
+irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex
 
 .NOTES
-    File Name      : Install-GalaxyBookEnabler.ps1
-    Prerequisite   : PowerShell 7.0 or later
-    Requires Admin : Yes
-    Version        : 3.2.0
-    Repository     : https://github.com/Bananz0/GalaxyBookEnabler
-    Patch Author   : Chirag Sood <chiragsd13@gmail.com>
-    Patch Notes    : v3.2.0 - Added Galaxy Book6 Ultra/Pro (960XKB/960XKA), AMD Ryzen
-                     support, CPU/Wi-Fi/BT platform detection, hardware compatibility
-                     report, and updated model selection menu.
+File Name  : Install-GalaxyBookEnabler.ps1
+Prerequisite : PowerShell 7.0 or later
+Requires Admin : Yes
+Version : 3.2.0
+Repository : https://github.com/Chiragsd13/GalaxyBookEnabler
+Patch Author : Chirag Sood
 #>
 
 param(
@@ -262,7 +221,7 @@ if (-not $isAdmin) {
 
 # VERSION CONSTANT
 $SCRIPT_VERSION = "3.2.0"
-$GITHUB_REPO = "Bananz0/GalaxyBookEnabler"
+$GITHUB_REPO = "Chiragsd13/GalaxyBookEnabler"
 $UPDATE_CHECK_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
 
 # LOGGING SETUP
