@@ -228,7 +228,7 @@ if (-not $isAdmin) {
 }
 
 # VERSION CONSTANT
-$SCRIPT_VERSION = "3.2.0"
+$SCRIPT_VERSION = "3.3.0"
 $GITHUB_REPO = "Chiragsd13/GalaxyBookEnabler"
 $UPDATE_CHECK_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
 
@@ -7458,7 +7458,7 @@ else {
     
     Write-Host "`n  Online One-Line Version:" -ForegroundColor Yellow
     Write-Host "  Run in PowerShell (Admin) - shows menu with all options:" -ForegroundColor Gray
-    Write-Host "    irm https://raw.githubusercontent.com/Bananz0/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex" -ForegroundColor White
+    Write-Host "    irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex" -ForegroundColor White
     
     Write-Host "`n  Downloaded Script Version:" -ForegroundColor Yellow
     Write-Host "  Download and run with parameters for direct actions:" -ForegroundColor Gray
@@ -7488,3 +7488,4 @@ else {
 }
 
 Write-Host "`n"
+Invoke-InteractivePause
