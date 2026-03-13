@@ -5697,6 +5697,29 @@ if ($GracePeriodSeconds -gt 0) {
 }
 
 try {
+    # Step 1: Stop SamsungSystemSupportEngine process so it re-reads registry on restart
+    $ssseProc = Get-Process -Name "SamsungSystemSupportEngine" -ErrorAction SilentlyContinue
+    if ($ssseProc) {
+        Write-Log "Stopping SamsungSystemSupportEngine process (PID $($ssseProc.Id))..."
+        Stop-Process -Name "SamsungSystemSupportEngine" -Force -ErrorAction SilentlyContinue
+        Write-Log "SamsungSystemSupportEngine stopped." -Level SUCCESS
+    }
+
+    # Step 2: Restart GBeSupportService first (GBE spoof service — not matched by *Samsung* wildcard)
+    $gbeSvc = Get-Service -Name "GBeSupportService" -ErrorAction SilentlyContinue
+    if ($gbeSvc) {
+        try {
+            Write-Log "Attempting to restart: GBeSupportService ($($gbeSvc.Status))"
+            Restart-Service -Name "GBeSupportService" -Force -ErrorAction Stop
+            $updatedGbe = Get-Service -Name "GBeSupportService" -ErrorAction SilentlyContinue
+            Write-Log "Success: GBeSupportService is now $($updatedGbe.Status)" -Level SUCCESS
+        }
+        catch {
+            Write-Log "Failed to restart GBeSupportService. Error: $($_.Exception.Message)" -Level WARNING
+        }
+    }
+
+    # Step 3: Restart all Samsung services
     $serviceMap = @{}
 
     foreach ($service in (Get-Service -DisplayName "*Samsung*" -ErrorAction SilentlyContinue)) {
