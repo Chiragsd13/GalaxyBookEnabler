@@ -5,6 +5,15 @@ All notable changes to Galaxy Book Enabler will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-03-12 (bug fixes)
+
+### Bug Fixes (addressing PR #85 code review)
+- **FullyAutonomous mode hang** — `Show-HardwareCompatibility` now skips `Read-Host` when `-FullyAutonomous` is active, preventing CI/scripted installs from hanging on non-Intel hardware
+- **Legacy v1.x migration unreachable** — moved legacy `QS.bat` detection to *before* model selection so `$biosValuesToUse` is not pre-set, making the "preserve custom values" path reachable
+- **Wi-Fi generation mis-reported** — removed duplicate device IDs `2723|2725` (Intel AX211) from the Wi-Fi 6 switch branch; they belong only in Wi-Fi 6E — AX211 was being reported as Wi-Fi 6 instead of Wi-Fi 6E
+
+---
+
 ## [3.2.0] - 2026-03-11
 
 ### New Device Profiles

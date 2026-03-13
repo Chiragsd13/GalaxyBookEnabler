@@ -404,3 +404,81 @@ If you don't have Intel Wi-Fi **and** Intel Bluetooth, consider **Google Nearby 
 * Download: [Google Nearby Share](https://www.android.com/better-together/nearby-share-app/)
 
 [1]: https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/README.md "raw.githubusercontent.com"
+
+## Troubleshooting
+
+### Verify Spoof Is Active
+
+Run this in any PowerShell window to confirm the spoof was applied:
+
+```powershell
+Get-ItemProperty 'HKLM:\HARDWARE\DESCRIPTION\System\BIOS' |
+    Select-Object SystemFamily, SystemProductName, SystemManufacturer, BIOSVersion
+```
+
+If values show your real hardware instead of Samsung, the startup task hasn't run yet. Reboot, or run the spoof script manually as Administrator:
+
+```powershell
+& "$env:USERPROFILE\.galaxy-book-enabler\GalaxyBookSpoof.bat"
+```
+
+After spoofing and rebooting, Samsung Settings will display the device as your chosen Galaxy Book model.
+
+### Multi Control Stops Working After Reboot
+
+- **Built-in recovery task**: Check Task Scheduler for `GalaxyBookEnabler-MultiControlInit`
+- **Expected timing**: Task starts at boot +5 minutes, then waits 1 minute before restarting Samsung services
+- **Run manually**: `pwsh -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\.galaxy-book-enabler\Init-SamsungMultiControlOnLogin.ps1"`
+- Multi Control is under active investigation — works intermittently on Wi-Fi 6/6E/7 even on real Galaxy Books
+
+### Nearby Devices Not Connecting
+
+- Ensure you are signed into Samsung Account
+- Sign out and back into Samsung Account, then reopen Nearby Devices
+- Reboot after the spoof task runs and try again
+- Nearby Devices does not require Intel Wi-Fi — it works on any adapter
+
+### Apps Not Appearing or Not Recognising Device
+
+- **Reboot required**: Some apps only read the BIOS identity at startup
+- **Verify spoof**: Run the registry check above to confirm spoofing is active
+- **Samsung Account**: Sign in to Samsung Account inside each app
+
+### Quick Share Not Working
+
+- Quick Share and Camera Share require **Intel Wi-Fi AX** (not AC) **and** Intel Bluetooth
+- Check Device Manager → Network Adapters for your Wi-Fi adapter model
+- Third-party Bluetooth (USB dongle, Realtek, MediaTek) will cause failures
+
+### Installation Fails
+
+- **Admin rights**: Must run PowerShell 7 as Administrator
+- **Winget issues**: Run `winget upgrade --all` to update winget
+- **Antivirus**: Temporarily disable if blocking installation
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for our development process.
+
+1. Fork the repository
+2. Create a feature branch
+3. Test thoroughly on your hardware
+4. Submit a pull request
+
+## Credits
+
+- Original script by [@obrobrio2000](https://github.com/obrobrio2000)
+- Enhanced and maintained by [@Bananz0](https://github.com/Bananz0)
+- v3.2.0 patch by Chirag Sood ([@Chiragsd13](https://github.com/Chiragsd13))
+
+## Disclaimer
+
+This tool is for educational and personal use only. Not affiliated with or endorsed by Samsung Electronics. Use at your own risk.
+
+## License
+
+MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+> Made with ❤️ for the Samsung ecosystem enthusiasts

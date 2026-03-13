@@ -1,4 +1,4 @@
-# Galaxy Book Enabler Installer/Uninstaller
+﻿# Galaxy Book Enabler Installer/Uninstaller
 # Enables Samsung Galaxy Book features on non-Galaxy Book devices
 
 <#
@@ -29,7 +29,13 @@ Prerequisite : PowerShell 7.0 or later
 Requires Admin : Yes
 Version : 3.2.0
 Repository : https://github.com/Chiragsd13/GalaxyBookEnabler
-Patch Author : Chirag Sood
+Patch Author : Chirag Sood <chiragsd13@gmail.com>
+Patch Notes  : v3.2.0 — Added Galaxy Book6 Ultra/Pro (960XKB/960XKA), AMD Ryzen
+               support, CPU/Wi-Fi/BT platform detection, hardware compatibility
+               report, and updated model selection menu.
+               Bug fixes (PR #85 review): FullyAutonomous Read-Host hang fixed;
+               legacy migration ordering fixed; Wi-Fi 6E/6 device ID overlap
+               (2723/2725) corrected.
 #>
 
 param(
@@ -360,7 +366,7 @@ function Get-WifiPlatform {
             $gen = switch -Regex ($hwId) {
                 '51F0|54F0|A840|7AF0|7E40' { '7'  }
                 'A0F0|02F0|06F0|34F0|43F0|4DF0|A8F0|2723|2725' { '6E' }
-                '2723|2725|271C|271B|2526|2528' { '6'  }
+                '271C|271B|2526|2528' { '6'  }
                 '24F3|24FD|24FB|3165|3168|9462|9560|9260' { '5'  }
                 default { 'Unknown' }
             }
@@ -582,7 +588,7 @@ function Show-HardwareCompatibility {
         Write-Host "  to work. Proceed at your own risk." -ForegroundColor Yellow
         Write-Host ""
     }
-    if (-not $CPU.IsIntel -or -not $Wifi.IsIntel) {
+    if ((-not $CPU.IsIntel -or -not $Wifi.IsIntel) -and -not $script:IsAutonomous) {
         Write-Host "  Press Enter to continue anyway, or Ctrl+C to exit." -ForegroundColor DarkGray
         Read-Host | Out-Null
     }
@@ -6773,35 +6779,10 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  STEP 2: Galaxy Book Model Selection" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
-# Only prompt for model selection if not already set from reinstall/legacy
-if (-not $biosValuesToUse) {
-    if ($script:IsAutonomous -and $AutonomousModel) {
-        $biosValuesToUse = Resolve-AutonomousModel -ModelCode $AutonomousModel
-    }
-    elseif (-not $script:IsAutonomous) {
-        $biosValuesToUse = Show-ModelSelectionMenu
-    }
-}
-
-# ==================== STEP 3: CREATE INSTALLATION ====================
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  STEP 3: Setting Up Files" -ForegroundColor Cyan
-Write-Host "========================================`n" -ForegroundColor Cyan
-
-if ($TestMode) {
-    Write-Host "[TEST MODE] Simulating file creation..." -ForegroundColor Yellow
-}
-
-if (-not (Test-Path $installPath)) {
-    if ($TestMode) {
-        Write-Host "  [TEST] Would create folder: $installPath" -ForegroundColor Gray
-    }
-    else {
-        New-Item -Path $installPath -ItemType Directory -Force | Out-Null
-    }
-}
-
-# Check for legacy v1.x installation
+# Check for legacy v1.x installation BEFORE model selection so that if the user
+# wants to preserve custom QS.bat values, biosValuesToUse is set here and the
+# model menu is skipped. (Bug fix: was placed after model selection, making the
+# legacy preserve path unreachable because biosValuesToUse was always set first.)
 $legacyPath = Join-Path $env:USERPROFILE "GalaxyBookEnablerScript"
 $legacyBatchPath = Join-Path $legacyPath "QS.bat"
 
@@ -6857,6 +6838,34 @@ if ((Test-Path $legacyBatchPath) -and -not $biosValuesToUse) {
         Write-Host "✓ Legacy installation uses standard values" -ForegroundColor Green
     }
     Write-Host ""
+}
+
+# Model selection — runs after legacy check so legacy-preserved values skip this
+if (-not $biosValuesToUse) {
+    if ($script:IsAutonomous -and $AutonomousModel) {
+        $biosValuesToUse = Resolve-AutonomousModel -ModelCode $AutonomousModel
+    }
+    elseif (-not $script:IsAutonomous) {
+        $biosValuesToUse = Show-ModelSelectionMenu
+    }
+}
+
+# ==================== STEP 3: CREATE INSTALLATION ====================
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  STEP 3: Setting Up Files" -ForegroundColor Cyan
+Write-Host "========================================`n" -ForegroundColor Cyan
+
+if ($TestMode) {
+    Write-Host "[TEST MODE] Simulating file creation..." -ForegroundColor Yellow
+}
+
+if (-not (Test-Path $installPath)) {
+    if ($TestMode) {
+        Write-Host "  [TEST] Would create folder: $installPath" -ForegroundColor Gray
+    }
+    else {
+        New-Item -Path $installPath -ItemType Directory -Force | Out-Null
+    }
 }
 
 # Create the batch file for registry spoofing
