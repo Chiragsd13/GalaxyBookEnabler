@@ -63,7 +63,7 @@ After installing, use `pwsh` (PowerShell 7) instead of `powershell` (Windows Pow
 
 ```powershell
 # Run in PowerShell 7 (pwsh)
-irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex
+irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/bootstrap.ps1 | iex
 ```
 
 *The installer will automatically request administrator privileges if needed.*
