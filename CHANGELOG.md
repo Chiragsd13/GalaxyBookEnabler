@@ -5,35 +5,26 @@ All notable changes to Galaxy Book Enabler will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.0] - 2026-03-12 (bug fixes)
+## [3.2.1] - 2026-03-12
+
+### Removed
+- **Removed unverified Galaxy Book6 placeholder profiles** (`960XKB`/`960XKA`) — these model numbers were inferred, not sourced from real hardware. Real Book6 model numbers are `960UJH` (Ultra) and `960XJG` (Pro); profiles will be added once SMBIOS data is sourced from real devices. See PR #85 discussion.
+- Total device profiles: **21** (back to upstream count)
 
 ### Bug Fixes (addressing PR #85 code review)
 - **FullyAutonomous mode hang** — `Show-HardwareCompatibility` now skips `Read-Host` when `-FullyAutonomous` is active, preventing CI/scripted installs from hanging on non-Intel hardware
 - **Legacy v1.x migration unreachable** — moved legacy `QS.bat` detection to *before* model selection so `$biosValuesToUse` is not pre-set, making the "preserve custom values" path reachable
 - **Wi-Fi generation mis-reported** — removed duplicate device IDs `2723|2725` (Intel AX211) from the Wi-Fi 6 switch branch; they belong only in Wi-Fi 6E — AX211 was being reported as Wi-Fi 6 instead of Wi-Fi 6E
+- AMD tip updated to recommend verified profiles (`960XHA`/`960XGL`) instead of removed placeholders
 
 ---
 
 ## [3.2.0] - 2026-03-11
 
-### New Device Profiles
-- Added **Galaxy Book6 Ultra 2026** (`960XKB`) — Intel Core Ultra Series 3 Panther Lake, Nvidia RTX 5070
-- Added **Galaxy Book6 Pro 2026** (`960XKA`) — Intel Core Ultra Series 3 Panther Lake, 14"/16" variants
-  - BIOS platform code: `AMB`/`AMC` (follows AMA from Book5 Pro)
-  - SKU suffix: `PTLK` (Panther Lake, mirrors `LNLM` for Lunar Lake in Book5)
-  - Model strings: `NP960XKA-KG1US` / `NP960XKB-KG1US`
-- Total device profiles: **23**
-
-### AMD Ryzen Support (addresses Issue #62, #47)
-- New `Get-CPUPlatform` function — detects Intel / AMD / ARM vendor at install time
-- New `Get-WifiPlatform` function — vendor-ID detection for Intel (8086), MediaTek/AMD RZ-series (14C3), Realtek (10EC), Qualcomm (168C/17CB)
-- New `Get-BluetoothPlatform` function — Intel (8087), MediaTek (0E8D), Realtek (0BDA)
-- New `Show-HardwareCompatibility` — pre-install compatibility report with per-feature matrix (Notes/Buds: always ✓; Quick Share: Intel Wi-Fi only; etc.)
-- AMD-specific guidance: recommends 960XKA or 960XHA profiles, explains Wi-Fi Direct limitation, links to Issue #62
-- ARM CPU detected → experimental warning shown (Issue #49)
-
-### UI
-- New `Show-ModelSelectionMenu` — groups models by series (Book6/5/4/3/Legacy), highlights ★ NEW models in cyan, shows AMD profile tip
+### Added
+- AMD Ryzen support — `Get-CPUPlatform`, `Get-WifiPlatform`, `Get-BluetoothPlatform` functions
+- `Show-HardwareCompatibility` — pre-install compatibility report with per-feature matrix
+- `Show-ModelSelectionMenu` — groups models by series (Book5/4/3/Legacy), shows AMD profile tip
 - Script scope caches `$script:DetectedCPU/Wifi/Bt` to avoid duplicate PnP scans
 
 ### Bug Fixes

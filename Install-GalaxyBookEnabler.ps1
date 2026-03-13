@@ -27,12 +27,13 @@ irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-
 File Name  : Install-GalaxyBookEnabler.ps1
 Prerequisite : PowerShell 7.0 or later
 Requires Admin : Yes
-Version : 3.2.0
+Version : 3.2.1
 Repository : https://github.com/Chiragsd13/GalaxyBookEnabler
 Patch Author : Chirag Sood <chiragsd13@gmail.com>
-Patch Notes  : v3.2.0 — Added Galaxy Book6 Ultra/Pro (960XKB/960XKA), AMD Ryzen
-               support, CPU/Wi-Fi/BT platform detection, hardware compatibility
-               report, and updated model selection menu.
+Patch Notes  : v3.2.1 — Removed unverified Galaxy Book6 placeholder profiles
+               (960XKB/960XKA) per upstream review. Added AMD Ryzen support,
+               CPU/Wi-Fi/BT platform detection, hardware compatibility report,
+               and updated model selection menu.
                Bug fixes (PR #85 review): FullyAutonomous Read-Host hang fixed;
                legacy migration ordering fixed; Wi-Fi 6E/6 device ID overlap
                (2723/2725) corrected.
@@ -573,7 +574,7 @@ function Show-HardwareCompatibility {
         }
         Write-Host ""
         Write-Host "  BIOS spoof recommendation for AMD systems:" -ForegroundColor Cyan
-        Write-Host "  Use a Galaxy Book5 Pro (960XHA) or Galaxy Book6 Pro (960XKA)" -ForegroundColor White
+        Write-Host "  Use a Galaxy Book5 Pro (960XHA) or Galaxy Book4 Ultra (960XGL)" -ForegroundColor White
         Write-Host "  profile — these are the most tested on non-Intel hardware." -ForegroundColor DarkGray
         Write-Host ""
     }
@@ -643,33 +644,10 @@ $GalaxyBookModels = @{
     '940XHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P05VAJ.280.250210.01'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro';       SystemProductName = '940XHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PVAJ'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP940XHA-KG3IT'; EnclosureKind = 10 }
     '960QHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P15ALY.360.250515.02'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro 360';    SystemProductName = '960QHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PALY'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960QHA-KG2UK'; EnclosureKind = 31 }
     '960XHA' = @{ BIOSVendor = 'American Megatrends International, LLC.'; BIOSVersion = 'P05AMA.140.250210.01'; BIOSMajorRelease = 5; BIOSMinorRelease = 32; SystemManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; SystemFamily = 'Galaxy Book5 Pro';       SystemProductName = '960XHA'; ProductSku = 'SCAI-PROT-A5A5-LNLM-PAMA'; BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'; BaseBoardProduct = 'NP960XHA-KG2DE'; EnclosureKind = 10 }
-    # ── Galaxy Book6 Series (NEW — 2026, Intel Panther Lake) ─
-    '960XKA' = @{
-        BIOSVendor           = 'American Megatrends International, LLC.'
-        BIOSVersion          = 'P01AMB.100.260115.01'
-        BIOSMajorRelease     = 5
-        BIOSMinorRelease     = 32
-        SystemManufacturer   = 'SAMSUNG ELECTRONICS CO., LTD.'
-        SystemFamily         = 'Galaxy Book6 Pro'
-        SystemProductName    = '960XKA'
-        ProductSku           = 'SCAI-PROT-A5A5-PTLK-PAMB'
-        BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'
-        BaseBoardProduct     = 'NP960XKA-KG1US'
-        EnclosureKind        = 10
-    }
-    '960XKB' = @{
-        BIOSVendor           = 'American Megatrends International, LLC.'
-        BIOSVersion          = 'P01AMC.100.260120.01'
-        BIOSMajorRelease     = 5
-        BIOSMinorRelease     = 32
-        SystemManufacturer   = 'SAMSUNG ELECTRONICS CO., LTD.'
-        SystemFamily         = 'Galaxy Book6 Ultra'
-        SystemProductName    = '960XKB'
-        ProductSku           = 'SCAI-PROT-A5A5-PTLK-PAMC'
-        BaseBoardManufacturer = 'SAMSUNG ELECTRONICS CO., LTD.'
-        BaseBoardProduct     = 'NP960XKB-KG1US'
-        EnclosureKind        = 10
-    }
+    # ── Galaxy Book6 Series — NOT YET AVAILABLE ──────────────
+    # Real model numbers: 960UJH (Ultra), 960XJG (Pro)
+    # SMBIOS data needs to be sourced from real hardware before
+    # these profiles can be added.  See PR #85 discussion.
 }
 
 
@@ -5369,7 +5347,6 @@ function Show-ModelSelectionMenu {
     #>
     $orderedModels = [System.Collections.Generic.List[hashtable]]::new()
     $groups = [ordered]@{
-        "Galaxy Book6 (2026 — Panther Lake)  ★ NEW" = @('960XKB', '960XKA')
         "Galaxy Book5 (2025 — Lunar Lake)"           = @('960XHA', '940XHA', '960QHA', '750QHA')
         "Galaxy Book4 (2024 — Meteor Lake)"          = @('960XGL', '960XGK', '940XGK', '960QGK', '750XGL', '750XGK', '950XGK')
         "Galaxy Book3 (2023 — Raptor Lake)"          = @('960XFH', '960XFG', '730QFG', '960QFG', '750XFG', '750XFH')
@@ -5392,7 +5369,7 @@ function Show-ModelSelectionMenu {
         }
     }
     Write-Host ""
-    Write-Host "  AMD Ryzen tip: Book6 Pro (960XKA) or Book5 Pro (960XHA) recommended" -ForegroundColor DarkYellow
+    Write-Host "  AMD Ryzen tip: Book5 Pro (960XHA) or Book4 Ultra (960XGL) recommended" -ForegroundColor DarkYellow
     Write-Host ""
     $choice = 0
     while ($choice -lt 1 -or $choice -gt $orderedModels.Count) {
