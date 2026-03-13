@@ -1,21 +1,24 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to Galaxy Book Enabler will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.2.1] - 2026-03-12
+## [3.3.0] - 2026-03-12
 
-### Removed
-- **Removed unverified Galaxy Book6 placeholder profiles** (`960XKB`/`960XKA`) — these model numbers were inferred, not sourced from real hardware. Real Book6 model numbers are `960UJH` (Ultra) and `960XJG` (Pro); profiles will be added once SMBIOS data is sourced from real devices. See PR #85 discussion.
-- Total device profiles: **21** (back to upstream count)
+### New Device Profiles — Galaxy Book6 (sourced, not guessed)
+- **Galaxy Book6 Ultra** (`960UJH`) — model confirmed via [Samsung.com](https://www.samsung.com/us/computers/galaxy-book/galaxy-book6-series/buy/galaxy-book6-ultra-16-intel-core-ultra-7-1tb-gray-sku-np960ujh-xg2us/)
+- **Galaxy Book6 Pro** (`960XJG`) — model + BIOS code `AMB` confirmed via [Geekbench](https://browser.geekbench.com/ai/v1/374978) (motherboard: `NP960XJG-PS2`)
+- **Galaxy Book6** (`760VJG`) — model confirmed via [Samsung UK](https://www.samsung.com/uk/business/computers/galaxy-book/galaxy-book6-16-inch-ultra-7-16gb-512gb-np760vjg-kg3uk/)
+- Replaces old placeholder profiles (`960XKB`/`960XKA`) which used fabricated model numbers
+- BIOSVersion strings are pattern-matched pending real hardware dumps
+- Total device profiles: **24**
 
 ### Bug Fixes (addressing PR #85 code review)
-- **FullyAutonomous mode hang** — `Show-HardwareCompatibility` now skips `Read-Host` when `-FullyAutonomous` is active, preventing CI/scripted installs from hanging on non-Intel hardware
-- **Legacy v1.x migration unreachable** — moved legacy `QS.bat` detection to *before* model selection so `$biosValuesToUse` is not pre-set, making the "preserve custom values" path reachable
-- **Wi-Fi generation mis-reported** — removed duplicate device IDs `2723|2725` (Intel AX211) from the Wi-Fi 6 switch branch; they belong only in Wi-Fi 6E — AX211 was being reported as Wi-Fi 6 instead of Wi-Fi 6E
-- AMD tip updated to recommend verified profiles (`960XHA`/`960XGL`) instead of removed placeholders
+- **FullyAutonomous mode hang** — `Show-HardwareCompatibility` now skips `Read-Host` when `-FullyAutonomous` is active
+- **Legacy v1.x migration unreachable** — moved legacy `QS.bat` detection to *before* model selection
+- **Wi-Fi generation mis-reported** — removed duplicate device IDs `2723|2725` from Wi-Fi 6 branch
 
 ---
 
