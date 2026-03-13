@@ -21,7 +21,7 @@ This tool spoofs your device as a Samsung Galaxy Book to enable Samsung apps and
 .\Install-GalaxyBookEnabler.ps1 -TestMode
 
 .EXAMPLE
-irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex
+irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/bootstrap.ps1 | iex
 
 .NOTES
 File Name  : Install-GalaxyBookEnabler.ps1
@@ -7458,7 +7458,7 @@ else {
     
     Write-Host "`n  Online One-Line Version:" -ForegroundColor Yellow
     Write-Host "  Run in PowerShell (Admin) - shows menu with all options:" -ForegroundColor Gray
-    Write-Host "    irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/Install-GalaxyBookEnabler.ps1 | iex" -ForegroundColor White
+    Write-Host "    irm https://raw.githubusercontent.com/Chiragsd13/GalaxyBookEnabler/main/bootstrap.ps1 | iex" -ForegroundColor White
     
     Write-Host "`n  Downloaded Script Version:" -ForegroundColor Yellow
     Write-Host "  Download and run with parameters for direct actions:" -ForegroundColor Gray
