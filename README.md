@@ -19,8 +19,8 @@ Galaxy Book Enabler spoofs your Windows PC as a Samsung Galaxy Book, unlocking a
 
 ## Features
 
-- **23 Galaxy Book Models** - Choose from authentic hardware profiles across Galaxy Book6/5/4/3 and legacy families
-- **New Galaxy Book6 2026 Profiles** - Includes Galaxy Book6 Ultra (`960XKB`) and Galaxy Book6 Pro (`960XKA`)
+- **24 Galaxy Book Models** - Choose from authentic hardware profiles across Galaxy Book6/5/4/3 and legacy families
+- **New Galaxy Book6 2026 Profiles** - Includes Galaxy Book6 Ultra (`960UJH`), Galaxy Book6 Pro (`960XJG`), and Galaxy Book6 (`760VJG`) — all sourced from real hardware
 - **AMD Ryzen Support** - Better guidance and profile recommendations for AMD systems
 - **Hardware Compatibility Report** - Detects CPU, Wi-Fi, and Bluetooth platforms before install and shows a feature support summary
 - **Vendor-ID-Based Detection** - Language-independent Wi-Fi and Bluetooth detection for more reliable compatibility checks
